@@ -394,6 +394,33 @@
       color: #b45309;
     }
     .warn-box.on { display: block; }
+
+    /* ── Footer ── */
+    .footer {
+      text-align: center;
+      margin-top: 3rem;
+      color: #94a3b8;
+      font-size: .8rem;
+    }
+
+    /* ── Print ── */
+    @media print {
+      body { background: #fff; padding: .5rem; }
+      .header, .top-grid, .toolbar, .warn-box { display: none !important; }
+      .puzzle-out { display: flex !important; gap: 1.5rem; }
+      .puzzle-card, .find-panel {
+        box-shadow: none !important;
+        border: none !important;
+        padding: 0 !important;
+      }
+      td { border-color: #999 !important; }
+      td.solved {
+        background: #fde68a !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+      .footer { margin-top: 1.5rem; }
+    }
   </style>
 </head>
 <body>
@@ -457,6 +484,15 @@
       <div class="toolbar">
         <button class="btn btn-outline" id="sol-btn" onclick="toggleSolution()">Show Solution</button>
         <button class="btn btn-outline" onclick="generate()">↻ Regenerate</button>
+        <button class="btn btn-outline" onclick="window.print()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2">
+            <polyline points="6 9 6 2 18 2 18 9"/>
+            <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+            <rect x="6" y="14" width="12" height="8"/>
+          </svg>
+          Print / Save PDF
+        </button>
       </div>
       <div class="grid-scroll">
         <table id="grid"></table>
@@ -470,6 +506,8 @@
     </div>
 
   </div>
+
+  <footer class="footer">Created by Or Vanon using Claude Code, 2026</footer>
 
 </div><!-- /wrap -->
 
