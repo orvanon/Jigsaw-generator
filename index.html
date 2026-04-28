@@ -608,11 +608,23 @@
       else failed.push(word);
     }
 
+    // Fill empty cells, excluding letters used by orthogonal neighbours
+    // to prevent same-letter runs that look wrong (especially in Hebrew).
     const alpha = lang === 'he' ? HEBREW_ALPHA : ENGLISH_ALPHA;
-    for (let r = 0; r < rows; r++)
-      for (let c = 0; c < cols; c++)
-        if (grid[r][c] === null)
-          grid[r][c] = alpha[Math.floor(Math.random() * alpha.length)];
+    const alphaArr = [...alpha];
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        if (grid[r][c] !== null) continue;
+        const used = new Set(
+          [[r-1,c],[r+1,c],[r,c-1],[r,c+1]]
+            .filter(([nr,nc]) => nr>=0 && nr<rows && nc>=0 && nc<cols && grid[nr][nc] !== null)
+            .map(([nr,nc]) => grid[nr][nc])
+        );
+        const pool = alphaArr.filter(l => !used.has(l));
+        const src = pool.length ? pool : alphaArr;
+        grid[r][c] = src[Math.floor(Math.random() * src.length)];
+      }
+    }
 
     solState = { visible: false, cells: solCells };
     renderGrid(grid, rows, cols, lang);
