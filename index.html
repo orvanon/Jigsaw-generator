@@ -4,447 +4,671 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Word Search Generator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
+    :root {
+      --bg: #f0f4ff;
+      --surface: #ffffff;
+      --border: #e2e8f0;
+      --accent: #6366f1;
+      --accent-dark: #4f46e5;
+      --accent-light: #eef2ff;
+      --accent-ring: #6366f122;
+      --text: #1e293b;
+      --muted: #64748b;
+      --danger: #ef4444;
+      --radius: 14px;
+      --radius-sm: 8px;
+      --shadow: 0 1px 4px rgba(0,0,0,.06), 0 4px 16px rgba(0,0,0,.06);
+    }
+
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      font-family: system-ui, -apple-system, sans-serif;
-      background: #f8fafc;
-      color: #1e293b;
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
       min-height: 100vh;
-      padding: 2rem 1rem;
+      padding: 2.5rem 1rem 5rem;
     }
 
-    .container {
-      max-width: 960px;
-      margin: 0 auto;
-    }
+    .header { text-align: center; margin-bottom: 2.5rem; }
 
-    h1 {
-      font-size: 1.75rem;
-      font-weight: 700;
-      margin-bottom: 0.25rem;
-    }
-
-    .subtitle {
-      color: #64748b;
-      margin-bottom: 2rem;
-      font-size: 0.95rem;
-    }
-
-    .controls {
-      background: #fff;
-      border: 1px solid #e2e8f0;
-      border-radius: 10px;
-      padding: 1.5rem;
-      margin-bottom: 2rem;
-      display: grid;
-      gap: 1.25rem;
-    }
-
-    .field label {
-      display: block;
-      font-weight: 600;
-      font-size: 0.875rem;
+    .header h1 {
+      font-size: 2.25rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
       margin-bottom: 0.4rem;
-      color: #374151;
+      letter-spacing: -0.02em;
     }
 
-    textarea {
-      width: 100%;
-      padding: 0.625rem 0.75rem;
-      border: 1px solid #d1d5db;
-      border-radius: 6px;
-      font-size: 1rem;
-      font-family: inherit;
-      height: 120px;
-      resize: vertical;
-      transition: border-color 0.15s;
+    .header p { color: var(--muted); font-size: 0.95rem; }
+
+    .wrap { max-width: 980px; margin: 0 auto; }
+
+    .top-grid {
+      display: grid;
+      grid-template-columns: 1fr 280px;
+      gap: 1.25rem;
+      margin-bottom: 1.25rem;
+      align-items: start;
     }
 
-    textarea:focus { outline: none; border-color: #6366f1; box-shadow: 0 0 0 3px #6366f120; }
+    @media (max-width: 680px) { .top-grid { grid-template-columns: 1fr; } }
 
-    .row {
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 1.5rem;
+    }
+
+    .card-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      color: var(--muted);
+      margin-bottom: 1rem;
+    }
+
+    .add-row { display: flex; gap: .5rem; margin-bottom: .875rem; }
+
+    .add-input {
+      flex: 1;
+      padding: .6rem .875rem;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      font: inherit;
+      font-size: .95rem;
+      outline: none;
+      transition: border-color .15s, box-shadow .15s;
+      background: #fafbff;
+    }
+
+    .add-input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-ring);
+      background: #fff;
+    }
+
+    .add-input.shake {
+      animation: shake .3s ease;
+      border-color: var(--danger) !important;
+    }
+
+    @keyframes shake {
+      0%,100% { transform: translateX(0); }
+      25% { transform: translateX(-4px); }
+      75% { transform: translateX(4px); }
+    }
+
+    .tray {
+      min-height: 88px;
+      padding: .75rem;
+      background: #f8faff;
+      border: 1.5px dashed #c7d2fe;
+      border-radius: var(--radius-sm);
       display: flex;
       flex-wrap: wrap;
-      gap: 1rem;
-      align-items: flex-end;
+      gap: .45rem;
+      align-content: flex-start;
+      transition: border-color .2s;
     }
+
+    .tray:focus-within { border-color: var(--accent); }
+
+    .tray-empty {
+      width: 100%;
+      text-align: center;
+      padding-top: .75rem;
+      color: #a5b4fc;
+      font-size: .85rem;
+      font-style: italic;
+      pointer-events: none;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: .3rem;
+      background: var(--accent-light);
+      border: 1.5px solid #c7d2fe;
+      border-radius: 999px;
+      padding: .28rem .55rem .28rem .75rem;
+      font-size: .875rem;
+      font-weight: 700;
+      color: #4338ca;
+      animation: pop .18s ease;
+      transition: background .15s;
+    }
+
+    @keyframes pop {
+      0% { transform: scale(.7); opacity: 0; }
+      80% { transform: scale(1.07); }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .chip:hover { background: #e0e7ff; }
+    .chip-word { cursor: pointer; user-select: none; }
+    .chip-word:hover { text-decoration: underline dotted; }
+
+    .chip.editing {
+      background: #fff;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-ring);
+      padding: .2rem .55rem;
+    }
+
+    .chip-edit {
+      border: none;
+      outline: none;
+      background: transparent;
+      font: inherit;
+      font-size: .875rem;
+      font-weight: 700;
+      color: #4338ca;
+      width: 80px;
+    }
+
+    .chip-del {
+      width: 1.15rem;
+      height: 1.15rem;
+      border-radius: 50%;
+      border: none;
+      background: #c7d2fe;
+      color: #4338ca;
+      font-size: .6rem;
+      line-height: 1;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: background .15s, color .15s;
+    }
+
+    .chip-del:hover { background: var(--danger); color: #fff; }
+
+    .tray-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: .625rem;
+    }
+
+    .word-count { font-size: .8rem; color: var(--muted); }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: .35rem;
+      padding: .6rem 1.2rem;
+      border: none;
+      border-radius: var(--radius-sm);
+      font: inherit;
+      font-size: .9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .15s, box-shadow .15s, filter .15s, transform .1s;
+      white-space: nowrap;
+    }
+
+    .btn:active { transform: scale(.97); }
+
+    .btn-accent { background: var(--accent); color: #fff; }
+    .btn-accent:hover { background: var(--accent-dark); }
+
+    .btn-generate {
+      width: 100%;
+      justify-content: center;
+      background: linear-gradient(135deg, #6366f1, #a855f7);
+      color: #fff;
+      padding: .75rem;
+      font-size: 1rem;
+      box-shadow: 0 2px 10px #6366f138;
+    }
+    .btn-generate:hover { filter: brightness(1.07); box-shadow: 0 4px 18px #6366f148; }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--danger);
+      font-size: .8rem;
+      padding: .25rem .6rem;
+      border-radius: 6px;
+    }
+    .btn-ghost:hover { background: #fef2f2; }
+
+    .btn-outline {
+      background: var(--surface);
+      color: var(--muted);
+      border: 1.5px solid var(--border);
+      font-size: .875rem;
+      padding: .5rem 1rem;
+    }
+    .btn-outline:hover { background: #f1f5f9; color: var(--text); }
+
+    .settings-stack { display: flex; flex-direction: column; gap: 1rem; }
+    .num-row { display: flex; gap: .875rem; }
+    .num-field { flex: 1; }
 
     .num-field label {
       display: block;
+      font-size: .78rem;
       font-weight: 600;
-      font-size: 0.875rem;
-      margin-bottom: 0.4rem;
-      color: #374151;
+      color: var(--muted);
+      margin-bottom: .35rem;
     }
 
-    input[type="number"] {
-      width: 90px;
-      padding: 0.625rem 0.75rem;
-      border: 1px solid #d1d5db;
-      border-radius: 6px;
+    .num-field input {
+      width: 100%;
+      padding: .6rem .75rem;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      font: inherit;
       font-size: 1rem;
-      transition: border-color 0.15s;
+      outline: none;
+      background: #fafbff;
+      transition: border-color .15s, box-shadow .15s;
     }
 
-    input[type="number"]:focus { outline: none; border-color: #6366f1; box-shadow: 0 0 0 3px #6366f120; }
-
-    .btn {
-      padding: 0.625rem 1.5rem;
-      border: none;
-      border-radius: 6px;
-      font-size: 1rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background 0.15s, transform 0.1s;
+    .num-field input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-ring);
     }
 
-    .btn:active { transform: scale(0.97); }
-
-    .btn-primary { background: #6366f1; color: #fff; }
-    .btn-primary:hover { background: #4f46e5; }
-
-    .btn-secondary { background: #f1f5f9; color: #374151; border: 1px solid #e2e8f0; }
-    .btn-secondary:hover { background: #e2e8f0; }
-
-    .error {
-      color: #dc2626;
-      font-size: 0.875rem;
-      padding: 0.5rem 0.75rem;
+    .error-box {
+      display: none;
       background: #fef2f2;
       border: 1px solid #fecaca;
-      border-radius: 6px;
-      display: none;
+      color: #dc2626;
+      border-radius: var(--radius-sm);
+      padding: .6rem .875rem;
+      font-size: .85rem;
     }
+    .error-box.on { display: block; }
 
-    .error.visible { display: block; }
-
-    .puzzle-section {
+    .puzzle-out {
       display: none;
-      gap: 2rem;
+      gap: 1.25rem;
       flex-wrap: wrap;
       align-items: flex-start;
     }
+    .puzzle-out.on { display: flex; }
 
-    .puzzle-section.visible { display: flex; }
+    .puzzle-card { flex: 1; min-width: 0; }
 
-    .grid-wrapper {
-      flex: 1;
-      min-width: 0;
-    }
-
-    .grid-actions {
+    .toolbar {
       display: flex;
-      gap: 0.75rem;
-      margin-bottom: 1rem;
+      gap: .5rem;
+      margin-bottom: 1.125rem;
       flex-wrap: wrap;
     }
 
-    .grid-scroll {
-      overflow-x: auto;
-      background: #fff;
-      border: 1px solid #e2e8f0;
-      border-radius: 10px;
-      padding: 1rem;
-      display: inline-block;
-      max-width: 100%;
-    }
+    .grid-scroll { overflow-x: auto; }
 
-    table {
-      border-collapse: collapse;
-    }
+    table { border-collapse: collapse; }
 
     td {
       width: 2.25rem;
       height: 2.25rem;
       text-align: center;
       vertical-align: middle;
-      font-size: 1.05rem;
+      font-size: 1rem;
       font-weight: 700;
       border: 1px solid #e2e8f0;
       user-select: none;
-      transition: background 0.2s;
+      transition: background .2s;
     }
 
-    td.solution {
-      background: #fde68a;
-      color: #92400e;
-    }
+    td.solved { background: #fde68a; color: #92400e; }
 
-    .word-panel {
-      min-width: 160px;
-      background: #fff;
-      border: 1px solid #e2e8f0;
-      border-radius: 10px;
-      padding: 1.25rem;
-    }
+    .find-panel { width: 210px; flex-shrink: 0; }
 
-    .word-panel h3 {
-      font-size: 0.875rem;
+    @media (max-width: 580px) { .find-panel { width: 100%; } }
+
+    .find-panel h3 {
+      font-size: .7rem;
       font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: #64748b;
-      margin-bottom: 0.75rem;
+      letter-spacing: .1em;
+      color: var(--muted);
+      margin-bottom: .875rem;
     }
 
-    .word-panel ul {
-      list-style: none;
+    .find-chips { display: flex; flex-wrap: wrap; gap: .4rem; }
+
+    .find-chip {
+      background: #f0fdf4;
+      border: 1.5px solid #bbf7d0;
+      color: #166534;
+      border-radius: 999px;
+      padding: .22rem .7rem;
+      font-size: .8rem;
+      font-weight: 700;
     }
 
-    .word-panel li {
-      padding: 0.3rem 0;
-      font-weight: 600;
-      font-size: 1rem;
-      border-bottom: 1px solid #f1f5f9;
-    }
-
-    .word-panel li:last-child { border-bottom: none; }
-
-    .failed-notice {
-      margin-top: 1rem;
-      font-size: 0.8rem;
-      color: #b45309;
+    .warn-box {
+      display: none;
+      margin-top: .875rem;
+      padding: .55rem .75rem;
       background: #fffbeb;
       border: 1px solid #fde68a;
-      border-radius: 6px;
-      padding: 0.5rem 0.75rem;
-      display: none;
+      border-radius: var(--radius-sm);
+      font-size: .8rem;
+      color: #b45309;
     }
-
-    .failed-notice.visible { display: block; }
+    .warn-box.on { display: block; }
   </style>
 </head>
 <body>
-  <div class="container">
+<div class="wrap">
+
+  <div class="header">
     <h1>Word Search Generator</h1>
-    <p class="subtitle">Supports English and Hebrew &mdash; language is detected automatically.</p>
-
-    <div class="controls">
-      <div class="field">
-        <label for="words">Words (one per line)</label>
-        <textarea id="words" placeholder="APPLE&#10;BANANA&#10;CHERRY"></textarea>
-      </div>
-      <div class="row">
-        <div class="num-field">
-          <label for="rows">Rows</label>
-          <input type="number" id="rows" value="12" min="5" max="30">
-        </div>
-        <div class="num-field">
-          <label for="cols">Columns</label>
-          <input type="number" id="cols" value="12" min="5" max="30">
-        </div>
-        <button class="btn btn-primary" onclick="generate()">Generate Puzzle</button>
-      </div>
-      <div id="error" class="error"></div>
-    </div>
-
-    <div id="puzzle-section" class="puzzle-section">
-      <div class="grid-wrapper">
-        <div class="grid-actions">
-          <button class="btn btn-secondary" id="solution-btn" onclick="toggleSolution()">Show Solution</button>
-          <button class="btn btn-secondary" onclick="generate()">Regenerate</button>
-        </div>
-        <div class="grid-scroll">
-          <table id="grid"></table>
-        </div>
-        <div id="failed-notice" class="failed-notice"></div>
-      </div>
-      <div class="word-panel">
-        <h3>Find these words</h3>
-        <ul id="word-list"></ul>
-      </div>
-    </div>
+    <p>English &amp; Hebrew &mdash; language detected automatically</p>
   </div>
 
-  <script>
-    const ENGLISH_ALPHA = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    const HEBREW_ALPHA  = 'אבגדהוזחטיכלמנסעפצקרשת';
+  <div class="top-grid">
 
-    const DIRS = [
-      [0, 1], [0, -1],
-      [1, 0], [-1, 0],
-      [1, 1], [1, -1],
-      [-1, 1], [-1, -1],
-    ];
+    <div class="card">
+      <div class="card-label">Words</div>
+      <div class="add-row">
+        <input id="word-input" class="add-input" type="text"
+               placeholder="Type a word, press Enter…" autocomplete="off" spellcheck="false">
+        <button class="btn btn-accent" onclick="addWord()">+ Add</button>
+      </div>
+      <div id="tray" class="tray">
+        <span class="tray-empty">No words yet — add some above</span>
+      </div>
+      <div class="tray-footer">
+        <span id="wcount" class="word-count">0 words</span>
+        <button class="btn btn-ghost" onclick="clearAll()">Clear all</button>
+      </div>
+    </div>
 
-    let state = { solutionVisible: false, solutionCells: new Set(), grid: null };
+    <div class="card">
+      <div class="card-label">Grid Settings</div>
+      <div class="settings-stack">
+        <div class="num-row">
+          <div class="num-field">
+            <label for="rows">Rows</label>
+            <input type="number" id="rows" value="12" min="5" max="30">
+          </div>
+          <div class="num-field">
+            <label for="cols">Columns</label>
+            <input type="number" id="cols" value="12" min="5" max="30">
+          </div>
+        </div>
+        <button class="btn btn-generate" onclick="generate()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2.5">
+            <polygon points="5 3 19 12 5 21 5 3"/>
+          </svg>
+          Generate Puzzle
+        </button>
+        <div id="error-box" class="error-box"></div>
+      </div>
+    </div>
 
-    function shuffle(arr) {
-      const a = [...arr];
-      for (let i = a.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [a[i], a[j]] = [a[j], a[i]];
+  </div>
+
+  <div id="puzzle-out" class="puzzle-out">
+
+    <div class="card puzzle-card">
+      <div class="toolbar">
+        <button class="btn btn-outline" id="sol-btn" onclick="toggleSolution()">Show Solution</button>
+        <button class="btn btn-outline" onclick="generate()">↻ Regenerate</button>
+      </div>
+      <div class="grid-scroll">
+        <table id="grid"></table>
+      </div>
+      <div id="warn-box" class="warn-box"></div>
+    </div>
+
+    <div class="card find-panel">
+      <h3>Find these words</h3>
+      <div id="find-chips" class="find-chips"></div>
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+  const ENGLISH_ALPHA = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  const HEBREW_ALPHA  = 'אבגדהוזחטיכלמנסעפצקרשת';
+  const DIRS = [[0,1],[0,-1],[1,0],[-1,0],[1,1],[1,-1],[-1,1],[-1,-1]];
+
+  let words = [];
+  let solState = { visible: false, cells: new Set() };
+
+  document.getElementById('word-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter') addWord();
+  });
+
+  function addWord() {
+    const inp = document.getElementById('word-input');
+    const val = inp.value.trim();
+    if (!val) return;
+    if (words.some(w => w.toLowerCase() === val.toLowerCase())) {
+      inp.classList.add('shake');
+      inp.addEventListener('animationend', () => inp.classList.remove('shake'), { once: true });
+      inp.select();
+      return;
+    }
+    words.push(val);
+    inp.value = '';
+    inp.focus();
+    renderChips();
+  }
+
+  function removeWord(i) {
+    words.splice(i, 1);
+    renderChips();
+  }
+
+  function clearAll() {
+    words = [];
+    renderChips();
+  }
+
+  function startEdit(i) {
+    const chip = document.querySelector(`.chip[data-i="${i}"]`);
+    if (!chip) return;
+    chip.classList.add('editing');
+    chip.innerHTML = `<input class="chip-edit" value="${escHtml(words[i])}" maxlength="30">`;
+    const inp = chip.querySelector('input');
+    inp.focus();
+    inp.select();
+    const commit = () => {
+      const v = inp.value.trim();
+      if (v && !words.some((w, j) => j !== i && w.toLowerCase() === v.toLowerCase())) {
+        words[i] = v;
       }
-      return a;
+      renderChips();
+    };
+    inp.addEventListener('blur', commit);
+    inp.addEventListener('keydown', e => {
+      if (e.key === 'Enter') inp.blur();
+      if (e.key === 'Escape') { inp.value = words[i]; inp.blur(); }
+    });
+  }
+
+  function escHtml(s) {
+    return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');
+  }
+
+  function renderChips() {
+    const tray = document.getElementById('tray');
+    const count = document.getElementById('wcount');
+    tray.innerHTML = '';
+    if (!words.length) {
+      tray.innerHTML = '<span class="tray-empty">No words yet — add some above</span>';
+      count.textContent = '0 words';
+      return;
+    }
+    count.textContent = `${words.length} word${words.length === 1 ? '' : 's'}`;
+    words.forEach((word, i) => {
+      const chip = document.createElement('div');
+      chip.className = 'chip';
+      chip.dataset.i = i;
+      chip.innerHTML = `
+        <span class="chip-word" title="Click to edit" onclick="startEdit(${i})">${escHtml(word)}</span>
+        <button class="chip-del" onclick="removeWord(${i})" title="Remove word">✕</button>
+      `;
+      tray.appendChild(chip);
+    });
+  }
+
+  function shuffle(arr) {
+    const a = [...arr];
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  function detectLang(list) {
+    return list.some(w => /[א-ת]/.test(w)) ? 'he' : 'en';
+  }
+
+  function cleanWord(word, lang) {
+    return lang === 'he'
+      ? word.replace(/[^א-ת]/g, '')
+      : word.toUpperCase().replace(/[^A-Z]/g, '');
+  }
+
+  function canPlace(grid, word, r, c, dr, dc, rows, cols) {
+    for (let i = 0; i < word.length; i++) {
+      const nr = r + dr * i, nc = c + dc * i;
+      if (nr < 0 || nr >= rows || nc < 0 || nc >= cols) return false;
+      const ex = grid[nr][nc];
+      if (ex !== null && ex !== word[i]) return false;
+    }
+    return true;
+  }
+
+  function doPlace(grid, word, r, c, dr, dc) {
+    const cells = [];
+    for (let i = 0; i < word.length; i++) {
+      grid[r + dr * i][c + dc * i] = word[i];
+      cells.push(`${r + dr * i},${c + dc * i}`);
+    }
+    return cells;
+  }
+
+  function placeWord(grid, word, rows, cols) {
+    const opts = [];
+    for (const [dr, dc] of DIRS)
+      for (let r = 0; r < rows; r++)
+        for (let c = 0; c < cols; c++)
+          if (canPlace(grid, word, r, c, dr, dc, rows, cols))
+            opts.push([r, c, dr, dc]);
+    if (!opts.length) return null;
+    const [r, c, dr, dc] = opts[Math.floor(Math.random() * opts.length)];
+    return doPlace(grid, word, r, c, dr, dc);
+  }
+
+  function setError(msg) {
+    const el = document.getElementById('error-box');
+    el.textContent = msg;
+    el.classList.toggle('on', !!msg);
+  }
+
+  function generate() {
+    setError('');
+    if (!words.length) { setError('Add at least one word first.'); return; }
+
+    const rows = Math.max(5, Math.min(30, parseInt(document.getElementById('rows').value) || 12));
+    const cols = Math.max(5, Math.min(30, parseInt(document.getElementById('cols').value) || 12));
+    const lang = detectLang(words);
+    const cleaned = words.map(w => cleanWord(w, lang)).filter(w => w.length > 0);
+
+    const tooLong = cleaned.filter(w => w.length > Math.max(rows, cols));
+    if (tooLong.length) {
+      setError(`Too long for grid: ${tooLong.join(', ')}. Increase rows/cols.`);
+      return;
     }
 
-    function detectLang(raw) {
-      return /[א-ת]/.test(raw) ? 'he' : 'en';
+    const grid = Array.from({ length: rows }, () => Array(cols).fill(null));
+    const sorted = shuffle(cleaned).sort((a, b) => b.length - a.length);
+    const solCells = new Set();
+    const placed = [], failed = [];
+
+    for (const word of sorted) {
+      const cells = placeWord(grid, word, rows, cols);
+      if (cells) { cells.forEach(k => solCells.add(k)); placed.push(word); }
+      else failed.push(word);
     }
 
-    function cleanWord(word, lang) {
-      if (lang === 'he') return word.replace(/[^א-ת]/g, '');
-      return word.toUpperCase().replace(/[^A-Z]/g, '');
+    const alpha = lang === 'he' ? HEBREW_ALPHA : ENGLISH_ALPHA;
+    for (let r = 0; r < rows; r++)
+      for (let c = 0; c < cols; c++)
+        if (grid[r][c] === null)
+          grid[r][c] = alpha[Math.floor(Math.random() * alpha.length)];
+
+    solState = { visible: false, cells: solCells };
+    renderGrid(grid, rows, cols, lang);
+    renderFindChips(placed, lang);
+
+    const warn = document.getElementById('warn-box');
+    if (failed.length) {
+      warn.textContent = `Could not place (try a larger grid): ${failed.join(', ')}`;
+      warn.classList.add('on');
+    } else {
+      warn.classList.remove('on');
     }
 
-    function canPlace(grid, word, r, c, dr, dc, rows, cols) {
-      for (let i = 0; i < word.length; i++) {
-        const nr = r + dr * i;
-        const nc = c + dc * i;
-        if (nr < 0 || nr >= rows || nc < 0 || nc >= cols) return false;
-        const existing = grid[nr][nc];
-        if (existing !== null && existing !== word[i]) return false;
+    document.getElementById('sol-btn').textContent = 'Show Solution';
+    const out = document.getElementById('puzzle-out');
+    out.classList.add('on');
+    out.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  function renderGrid(grid, rows, cols, lang) {
+    const table = document.getElementById('grid');
+    table.innerHTML = '';
+    table.dir = lang === 'he' ? 'rtl' : 'ltr';
+    for (let r = 0; r < rows; r++) {
+      const tr = document.createElement('tr');
+      for (let c = 0; c < cols; c++) {
+        const td = document.createElement('td');
+        td.textContent = grid[r][c];
+        td.dataset.pos = `${r},${c}`;
+        tr.appendChild(td);
       }
-      return true;
+      table.appendChild(tr);
     }
+  }
 
-    function doPlace(grid, word, r, c, dr, dc) {
-      const cells = [];
-      for (let i = 0; i < word.length; i++) {
-        grid[r + dr * i][c + dc * i] = word[i];
-        cells.push(`${r + dr * i},${c + dc * i}`);
-      }
-      return cells;
-    }
+  function renderFindChips(list, lang) {
+    const container = document.getElementById('find-chips');
+    container.innerHTML = '';
+    container.dir = lang === 'he' ? 'rtl' : 'ltr';
+    list.forEach(word => {
+      const el = document.createElement('div');
+      el.className = 'find-chip';
+      el.textContent = word;
+      container.appendChild(el);
+    });
+  }
 
-    function placeWord(grid, word, rows, cols) {
-      const options = [];
-      for (const [dr, dc] of DIRS) {
-        for (let r = 0; r < rows; r++) {
-          for (let c = 0; c < cols; c++) {
-            if (canPlace(grid, word, r, c, dr, dc, rows, cols)) {
-              options.push([r, c, dr, dc]);
-            }
-          }
-        }
-      }
-      if (!options.length) return null;
-      const [r, c, dr, dc] = options[Math.floor(Math.random() * options.length)];
-      return doPlace(grid, word, r, c, dr, dc);
-    }
-
-    function generate() {
-      const errorEl = document.getElementById('error');
-      errorEl.textContent = '';
-      errorEl.classList.remove('visible');
-
-      const rawInput = document.getElementById('words').value.trim();
-      const rows = Math.max(5, Math.min(30, parseInt(document.getElementById('rows').value) || 12));
-      const cols = Math.max(5, Math.min(30, parseInt(document.getElementById('cols').value) || 12));
-
-      if (!rawInput) {
-        showError('Please enter at least one word.');
-        return;
-      }
-
-      const lang = detectLang(rawInput);
-      const words = rawInput
-        .split('\n')
-        .map(w => cleanWord(w.trim(), lang))
-        .filter(w => w.length > 0);
-
-      if (!words.length) {
-        showError('No valid words found. Make sure words use only letters.');
-        return;
-      }
-
-      const tooLong = words.filter(w => w.length > Math.max(rows, cols));
-      if (tooLong.length) {
-        showError(`Word(s) too long for this grid size: ${tooLong.join(', ')}. Increase rows/columns or shorten the words.`);
-        return;
-      }
-
-      const grid = Array.from({ length: rows }, () => Array(cols).fill(null));
-      const sorted = shuffle(words).sort((a, b) => b.length - a.length);
-
-      const solutionCells = new Set();
-      const placed = [];
-      const failed = [];
-
-      for (const word of sorted) {
-        const cells = placeWord(grid, word, rows, cols);
-        if (cells) {
-          cells.forEach(k => solutionCells.add(k));
-          placed.push(word);
-        } else {
-          failed.push(word);
-        }
-      }
-
-      const alpha = lang === 'he' ? HEBREW_ALPHA : ENGLISH_ALPHA;
-      for (let r = 0; r < rows; r++) {
-        for (let c = 0; c < cols; c++) {
-          if (grid[r][c] === null) {
-            grid[r][c] = alpha[Math.floor(Math.random() * alpha.length)];
-          }
-        }
-      }
-
-      state = { solutionVisible: false, solutionCells, grid };
-
-      renderGrid(grid, rows, cols, lang);
-      renderWordList(placed, lang);
-      renderFailedNotice(failed);
-
-      document.getElementById('solution-btn').textContent = 'Show Solution';
-      document.getElementById('puzzle-section').classList.add('visible');
-    }
-
-    function showError(msg) {
-      const el = document.getElementById('error');
-      el.textContent = msg;
-      el.classList.add('visible');
-    }
-
-    function renderGrid(grid, rows, cols, lang) {
-      const table = document.getElementById('grid');
-      table.innerHTML = '';
-      table.dir = lang === 'he' ? 'rtl' : 'ltr';
-      for (let r = 0; r < rows; r++) {
-        const tr = document.createElement('tr');
-        for (let c = 0; c < cols; c++) {
-          const td = document.createElement('td');
-          td.textContent = grid[r][c];
-          td.dataset.pos = `${r},${c}`;
-          tr.appendChild(td);
-        }
-        table.appendChild(tr);
-      }
-    }
-
-    function renderWordList(words, lang) {
-      const ul = document.getElementById('word-list');
-      ul.innerHTML = '';
-      ul.dir = lang === 'he' ? 'rtl' : 'ltr';
-      for (const word of words) {
-        const li = document.createElement('li');
-        li.textContent = word;
-        ul.appendChild(li);
-      }
-    }
-
-    function renderFailedNotice(failed) {
-      const el = document.getElementById('failed-notice');
-      if (!failed.length) {
-        el.classList.remove('visible');
-        return;
-      }
-      el.textContent = `Could not place (try a larger grid): ${failed.join(', ')}`;
-      el.classList.add('visible');
-    }
-
-    function toggleSolution() {
-      state.solutionVisible = !state.solutionVisible;
-      document.querySelectorAll('#grid td').forEach(td => {
-        if (state.solutionCells.has(td.dataset.pos)) {
-          td.classList.toggle('solution', state.solutionVisible);
-        }
-      });
-      document.getElementById('solution-btn').textContent =
-        state.solutionVisible ? 'Hide Solution' : 'Show Solution';
-    }
-  </script>
+  function toggleSolution() {
+    solState.visible = !solState.visible;
+    document.querySelectorAll('#grid td').forEach(td => {
+      if (solState.cells.has(td.dataset.pos))
+        td.classList.toggle('solved', solState.visible);
+    });
+    document.getElementById('sol-btn').textContent =
+      solState.visible ? 'Hide Solution' : 'Show Solution';
+  }
+</script>
 </body>
 </html>
