@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Word Search Generator</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: #f8fafc;
+      color: #1e293b;
+      min-height: 100vh;
+      padding: 2rem 1rem;
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      margin-bottom: 0.25rem;
+    }
+
+    .subtitle {
+      color: #64748b;
+      margin-bottom: 2rem;
+      font-size: 0.95rem;
+    }
+
+    .controls {
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      display: grid;
+      gap: 1.25rem;
+    }
+
+    .field label {
+      display: block;
+      font-weight: 600;
+      font-size: 0.875rem;
+      margin-bottom: 0.4rem;
+      color: #374151;
+    }
+
+    textarea {
+      width: 100%;
+      padding: 0.625rem 0.75rem;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      font-size: 1rem;
+      font-family: inherit;
+      height: 120px;
+      resize: vertical;
+      transition: border-color 0.15s;
+    }
+
+    textarea:focus { outline: none; border-color: #6366f1; box-shadow: 0 0 0 3px #6366f120; }
+
+    .row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      align-items: flex-end;
+    }
+
+    .num-field label {
+      display: block;
+      font-weight: 600;
+      font-size: 0.875rem;
+      margin-bottom: 0.4rem;
+      color: #374151;
+    }
+
+    input[type="number"] {
+      width: 90px;
+      padding: 0.625rem 0.75rem;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      font-size: 1rem;
+      transition: border-color 0.15s;
+    }
+
+    input[type="number"]:focus { outline: none; border-color: #6366f1; box-shadow: 0 0 0 3px #6366f120; }
+
+    .btn {
+      padding: 0.625rem 1.5rem;
+      border: none;
+      border-radius: 6px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.1s;
+    }
+
+    .btn:active { transform: scale(0.97); }
+
+    .btn-primary { background: #6366f1; color: #fff; }
+    .btn-primary:hover { background: #4f46e5; }
+
+    .btn-secondary { background: #f1f5f9; color: #374151; border: 1px solid #e2e8f0; }
+    .btn-secondary:hover { background: #e2e8f0; }
+
+    .error {
+      color: #dc2626;
+      font-size: 0.875rem;
+      padding: 0.5rem 0.75rem;
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-radius: 6px;
+      display: none;
+    }
+
+    .error.visible { display: block; }
+
+    .puzzle-section {
+      display: none;
+      gap: 2rem;
+      flex-wrap: wrap;
+      align-items: flex-start;
+    }
+
+    .puzzle-section.visible { display: flex; }
+
+    .grid-wrapper {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .grid-actions {
+      display: flex;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .grid-scroll {
+      overflow-x: auto;
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 1rem;
+      display: inline-block;
+      max-width: 100%;
+    }
+
+    table {
+      border-collapse: collapse;
+    }
+
+    td {
+      width: 2.25rem;
+      height: 2.25rem;
+      text-align: center;
+      vertical-align: middle;
+      font-size: 1.05rem;
+      font-weight: 700;
+      border: 1px solid #e2e8f0;
+      user-select: none;
+      transition: background 0.2s;
+    }
+
+    td.solution {
+      background: #fde68a;
+      color: #92400e;
+    }
+
+    .word-panel {
+      min-width: 160px;
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 1.25rem;
+    }
+
+    .word-panel h3 {
+      font-size: 0.875rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #64748b;
+      margin-bottom: 0.75rem;
+    }
+
+    .word-panel ul {
+      list-style: none;
+    }
+
+    .word-panel li {
+      padding: 0.3rem 0;
+      font-weight: 600;
+      font-size: 1rem;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .word-panel li:last-child { border-bottom: none; }
+
+    .failed-notice {
+      margin-top: 1rem;
+      font-size: 0.8rem;
+      color: #b45309;
+      background: #fffbeb;
+      border: 1px solid #fde68a;
+      border-radius: 6px;
+      padding: 0.5rem 0.75rem;
+      display: none;
+    }
+
+    .failed-notice.visible { display: block; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Word Search Generator</h1>
+    <p class="subtitle">Supports English and Hebrew &mdash; language is detected automatically.</p>
+
+    <div class="controls">
+      <div class="field">
+        <label for="words">Words (one per line)</label>
+        <textarea id="words" placeholder="APPLE&#10;BANANA&#10;CHERRY"></textarea>
+      </div>
+      <div class="row">
+        <div class="num-field">
+          <label for="rows">Rows</label>
+          <input type="number" id="rows" value="12" min="5" max="30">
+        </div>
+        <div class="num-field">
+          <label for="cols">Columns</label>
+          <input type="number" id="cols" value="12" min="5" max="30">
+        </div>
+        <button class="btn btn-primary" onclick="generate()">Generate Puzzle</button>
+      </div>
+      <div id="error" class="error"></div>
+    </div>
+
+    <div id="puzzle-section" class="puzzle-section">
+      <div class="grid-wrapper">
+        <div class="grid-actions">
+          <button class="btn btn-secondary" id="solution-btn" onclick="toggleSolution()">Show Solution</button>
+          <button class="btn btn-secondary" onclick="generate()">Regenerate</button>
+        </div>
+        <div class="grid-scroll">
+          <table id="grid"></table>
+        </div>
+        <div id="failed-notice" class="failed-notice"></div>
+      </div>
+      <div class="word-panel">
+        <h3>Find these words</h3>
+        <ul id="word-list"></ul>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const ENGLISH_ALPHA = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const HEBREW_ALPHA  = 'אבגדהוזחטיכלמנסעפצקרשת';
+
+    // All 8 directions: [row-delta, col-delta]
+    const DIRS = [
+      [0, 1], [0, -1],
+      [1, 0], [-1, 0],
+      [1, 1], [1, -1],
+      [-1, 1], [-1, -1],
+    ];
+
+    let state = { solutionVisible: false, solutionCells: new Set(), grid: null };
+
+    function shuffle(arr) {
+      const a = [...arr];
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    function detectLang(raw) {
+      return /[א-ת]/.test(raw) ? 'he' : 'en';
+    }
+
+    function cleanWord(word, lang) {
+      if (lang === 'he') return word.replace(/[^א-ת]/g, '');
+      return word.toUpperCase().replace(/[^A-Z]/g, '');
+    }
+
+    // Returns true if `word` can be placed starting at (r,c) going (dr,dc)
+    // Placement is valid only if each cell is empty OR already holds the correct letter.
+    function canPlace(grid, word, r, c, dr, dc, rows, cols) {
+      for (let i = 0; i < word.length; i++) {
+        const nr = r + dr * i;
+        const nc = c + dc * i;
+        if (nr < 0 || nr >= rows || nc < 0 || nc >= cols) return false;
+        const existing = grid[nr][nc];
+        if (existing !== null && existing !== word[i]) return false;
+      }
+      return true;
+    }
+
+    function doPlace(grid, word, r, c, dr, dc) {
+      const cells = [];
+      for (let i = 0; i < word.length; i++) {
+        grid[r + dr * i][c + dc * i] = word[i];
+        cells.push(`${r + dr * i},${c + dc * i}`);
+      }
+      return cells;
+    }
+
+    // Collects all valid (r, c, dr, dc) placements for `word` and picks one at random.
+    function placeWord(grid, word, rows, cols) {
+      const options = [];
+      for (const [dr, dc] of DIRS) {
+        for (let r = 0; r < rows; r++) {
+          for (let c = 0; c < cols; c++) {
+            if (canPlace(grid, word, r, c, dr, dc, rows, cols)) {
+              options.push([r, c, dr, dc]);
+            }
+          }
+        }
+      }
+      if (!options.length) return null;
+      const [r, c, dr, dc] = options[Math.floor(Math.random() * options.length)];
+      return doPlace(grid, word, r, c, dr, dc);
+    }
+
+    function generate() {
+      const errorEl = document.getElementById('error');
+      errorEl.textContent = '';
+      errorEl.classList.remove('visible');
+
+      const rawInput = document.getElementById('words').value.trim();
+      const rows = Math.max(5, Math.min(30, parseInt(document.getElementById('rows').value) || 12));
+      const cols = Math.max(5, Math.min(30, parseInt(document.getElementById('cols').value) || 12));
+
+      if (!rawInput) {
+        showError('Please enter at least one word.');
+        return;
+      }
+
+      const lang = detectLang(rawInput);
+      const words = rawInput
+        .split('\n')
+        .map(w => cleanWord(w.trim(), lang))
+        .filter(w => w.length > 0);
+
+      if (!words.length) {
+        showError('No valid words found. Make sure words use only letters.');
+        return;
+      }
+
+      const tooLong = words.filter(w => w.length > Math.max(rows, cols));
+      if (tooLong.length) {
+        showError(`Word(s) too long for this grid size: ${tooLong.join(', ')}. Increase rows/columns or shorten the words.`);
+        return;
+      }
+
+      // Build empty grid
+      const grid = Array.from({ length: rows }, () => Array(cols).fill(null));
+
+      // Place longest words first to maximise success rate
+      const sorted = shuffle(words).sort((a, b) => b.length - a.length);
+
+      const solutionCells = new Set();
+      const placed = [];
+      const failed = [];
+
+      for (const word of sorted) {
+        const cells = placeWord(grid, word, rows, cols);
+        if (cells) {
+          cells.forEach(k => solutionCells.add(k));
+          placed.push(word);
+        } else {
+          failed.push(word);
+        }
+      }
+
+      // Fill remaining empty cells with random letters from the correct alphabet.
+      // Each empty cell independently samples a random letter — no artificial
+      // de-duplication of filler, which would bias the distribution.
+      const alpha = lang === 'he' ? HEBREW_ALPHA : ENGLISH_ALPHA;
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          if (grid[r][c] === null) {
+            grid[r][c] = alpha[Math.floor(Math.random() * alpha.length)];
+          }
+        }
+      }
+
+      state = { solutionVisible: false, solutionCells, grid };
+
+      renderGrid(grid, rows, cols, lang);
+      renderWordList(placed, lang);
+      renderFailedNotice(failed);
+
+      document.getElementById('solution-btn').textContent = 'Show Solution';
+      document.getElementById('puzzle-section').classList.add('visible');
+    }
+
+    function showError(msg) {
+      const el = document.getElementById('error');
+      el.textContent = msg;
+      el.classList.add('visible');
+    }
+
+    function renderGrid(grid, rows, cols, lang) {
+      const table = document.getElementById('grid');
+      table.innerHTML = '';
+      // Hebrew grids read right-to-left naturally; mirroring columns gives
+      // correct visual order without changing placement logic.
+      table.dir = lang === 'he' ? 'rtl' : 'ltr';
+      for (let r = 0; r < rows; r++) {
+        const tr = document.createElement('tr');
+        for (let c = 0; c < cols; c++) {
+          const td = document.createElement('td');
+          td.textContent = grid[r][c];
+          td.dataset.pos = `${r},${c}`;
+          tr.appendChild(td);
+        }
+        table.appendChild(tr);
+      }
+    }
+
+    function renderWordList(words, lang) {
+      const ul = document.getElementById('word-list');
+      ul.innerHTML = '';
+      ul.dir = lang === 'he' ? 'rtl' : 'ltr';
+      for (const word of words) {
+        const li = document.createElement('li');
+        li.textContent = word;
+        ul.appendChild(li);
+      }
+    }
+
+    function renderFailedNotice(failed) {
+      const el = document.getElementById('failed-notice');
+      if (!failed.length) {
+        el.classList.remove('visible');
+        return;
+      }
+      el.textContent = `Could not place (try a larger grid): ${failed.join(', ')}`;
+      el.classList.add('visible');
+    }
+
+    function toggleSolution() {
+      state.solutionVisible = !state.solutionVisible;
+      document.querySelectorAll('#grid td').forEach(td => {
+        if (state.solutionCells.has(td.dataset.pos)) {
+          td.classList.toggle('solution', state.solutionVisible);
+        }
+      });
+      document.getElementById('solution-btn').textContent =
+        state.solutionVisible ? 'Hide Solution' : 'Show Solution';
+    }
+  </script>
+</body>
+</html>
