@@ -262,7 +262,6 @@
     const ENGLISH_ALPHA = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     const HEBREW_ALPHA  = 'אבגדהוזחטיכלמנסעפצקרשת';
 
-    // All 8 directions: [row-delta, col-delta]
     const DIRS = [
       [0, 1], [0, -1],
       [1, 0], [-1, 0],
@@ -290,8 +289,6 @@
       return word.toUpperCase().replace(/[^A-Z]/g, '');
     }
 
-    // Returns true if `word` can be placed starting at (r,c) going (dr,dc)
-    // Placement is valid only if each cell is empty OR already holds the correct letter.
     function canPlace(grid, word, r, c, dr, dc, rows, cols) {
       for (let i = 0; i < word.length; i++) {
         const nr = r + dr * i;
@@ -312,7 +309,6 @@
       return cells;
     }
 
-    // Collects all valid (r, c, dr, dc) placements for `word` and picks one at random.
     function placeWord(grid, word, rows, cols) {
       const options = [];
       for (const [dr, dc] of DIRS) {
@@ -360,10 +356,7 @@
         return;
       }
 
-      // Build empty grid
       const grid = Array.from({ length: rows }, () => Array(cols).fill(null));
-
-      // Place longest words first to maximise success rate
       const sorted = shuffle(words).sort((a, b) => b.length - a.length);
 
       const solutionCells = new Set();
@@ -380,9 +373,6 @@
         }
       }
 
-      // Fill remaining empty cells with random letters from the correct alphabet.
-      // Each empty cell independently samples a random letter — no artificial
-      // de-duplication of filler, which would bias the distribution.
       const alpha = lang === 'he' ? HEBREW_ALPHA : ENGLISH_ALPHA;
       for (let r = 0; r < rows; r++) {
         for (let c = 0; c < cols; c++) {
@@ -411,8 +401,6 @@
     function renderGrid(grid, rows, cols, lang) {
       const table = document.getElementById('grid');
       table.innerHTML = '';
-      // Hebrew grids read right-to-left naturally; mirroring columns gives
-      // correct visual order without changing placement logic.
       table.dir = lang === 'he' ? 'rtl' : 'ltr';
       for (let r = 0; r < rows; r++) {
         const tr = document.createElement('tr');
