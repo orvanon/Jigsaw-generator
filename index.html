@@ -33,6 +33,40 @@
       padding: 2.5rem 1rem 5rem;
     }
 
+    /* ── Lang toggle ── */
+    .lang-toggle {
+      display: flex;
+      justify-content: center;
+      gap: .25rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .lang-btn {
+      padding: .3rem .9rem;
+      border: 1.5px solid var(--border);
+      border-radius: 999px;
+      background: var(--surface);
+      color: var(--muted);
+      font: inherit;
+      font-size: .8rem;
+      font-weight: 700;
+      letter-spacing: .04em;
+      cursor: pointer;
+      transition: background .15s, border-color .15s, color .15s;
+    }
+
+    .lang-btn.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+
+    .lang-btn:not(.active):hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    /* ── Header ── */
     .header { text-align: center; margin-bottom: 2.5rem; }
 
     .header h1 {
@@ -48,6 +82,7 @@
 
     .header p { color: var(--muted); font-size: 0.95rem; }
 
+    /* ── Layout ── */
     .wrap { max-width: 980px; margin: 0 auto; }
 
     .top-grid {
@@ -60,6 +95,7 @@
 
     @media (max-width: 680px) { .top-grid { grid-template-columns: 1fr; } }
 
+    /* ── Card ── */
     .card {
       background: var(--surface);
       border: 1px solid var(--border);
@@ -77,6 +113,7 @@
       margin-bottom: 1rem;
     }
 
+    /* ── Word input ── */
     .add-row { display: flex; gap: .5rem; margin-bottom: .875rem; }
 
     .add-input {
@@ -108,6 +145,7 @@
       75% { transform: translateX(4px); }
     }
 
+    /* ── Chip tray ── */
     .tray {
       min-height: 88px;
       padding: .75rem;
@@ -133,6 +171,7 @@
       pointer-events: none;
     }
 
+    /* ── Chip ── */
     .chip {
       display: inline-flex;
       align-items: center;
@@ -147,6 +186,8 @@
       animation: pop .18s ease;
       transition: background .15s;
     }
+
+    [dir="rtl"] .chip { padding: .28rem .75rem .28rem .55rem; }
 
     @keyframes pop {
       0% { transform: scale(.7); opacity: 0; }
@@ -195,6 +236,7 @@
 
     .chip-del:hover { background: var(--danger); color: #fff; }
 
+    /* ── Tray footer ── */
     .tray-footer {
       display: flex;
       justify-content: space-between;
@@ -204,6 +246,7 @@
 
     .word-count { font-size: .8rem; color: var(--muted); }
 
+    /* ── Buttons ── */
     .btn {
       display: inline-flex;
       align-items: center;
@@ -253,6 +296,7 @@
     }
     .btn-outline:hover { background: #f1f5f9; color: var(--text); }
 
+    /* ── Settings card ── */
     .settings-stack { display: flex; flex-direction: column; gap: 1rem; }
     .num-row { display: flex; gap: .875rem; }
     .num-field { flex: 1; }
@@ -293,6 +337,7 @@
     }
     .error-box.on { display: block; }
 
+    /* ── Puzzle output ── */
     .puzzle-out {
       display: none;
       gap: 1.25rem;
@@ -328,6 +373,7 @@
 
     td.solved { background: #fde68a; color: #92400e; }
 
+    /* ── Find-words panel ── */
     .find-panel { width: 210px; flex-shrink: 0; }
 
     @media (max-width: 580px) { .find-panel { width: 100%; } }
@@ -376,7 +422,7 @@
     /* ── Print ── */
     @media print {
       body { background: #fff; padding: .5rem; }
-      .header, .top-grid, .toolbar, .warn-box { display: none !important; }
+      .lang-toggle, .header, .top-grid, .toolbar, .warn-box { display: none !important; }
       .puzzle-out { display: flex !important; gap: 1.5rem; }
       .puzzle-card, .find-panel {
         box-shadow: none !important;
@@ -396,39 +442,53 @@
 <body>
 <div class="wrap">
 
+  <!-- Language toggle -->
+  <div class="lang-toggle">
+    <button id="btn-en" class="lang-btn active" onclick="setLang('en')">EN</button>
+    <button id="btn-he" class="lang-btn" onclick="setLang('he')">&#x05E2;&#x05D1;</button>
+  </div>
+
   <div class="header">
-    <h1>Word Search Generator</h1>
-    <p>English &amp; Hebrew &mdash; language detected automatically</p>
+    <h1 data-i18n="title">Word Search Generator</h1>
+    <p data-i18n="subtitle">English &amp; Hebrew &mdash; language detected automatically</p>
   </div>
 
   <div class="top-grid">
 
+    <!-- Word manager -->
     <div class="card">
-      <div class="card-label">Words</div>
+      <div class="card-label" data-i18n="wordsLabel">Words</div>
       <div class="add-row">
         <input id="word-input" class="add-input" type="text"
-               placeholder="Type a word, press Enter…" autocomplete="off" spellcheck="false">
-        <button class="btn btn-accent" onclick="addWord()">+ Add</button>
+               data-i18n-ph="placeholder"
+               placeholder="Type a word, press Enter…"
+               autocomplete="off" spellcheck="false">
+        <button class="btn btn-accent" onclick="addWord()">
+          <span data-i18n="addBtn">+ Add</span>
+        </button>
       </div>
       <div id="tray" class="tray">
-        <span class="tray-empty">No words yet — add some above</span>
+        <span class="tray-empty" data-i18n="emptyTray">No words yet — add some above</span>
       </div>
       <div class="tray-footer">
-        <span id="wcount" class="word-count">0 words</span>
-        <button class="btn btn-ghost" onclick="clearAll()">Clear all</button>
+        <span id="wcount" class="word-count">0</span>
+        <button class="btn btn-ghost" onclick="clearAll()">
+          <span data-i18n="clearAll">Clear all</span>
+        </button>
       </div>
     </div>
 
+    <!-- Settings -->
     <div class="card">
-      <div class="card-label">Grid Settings</div>
+      <div class="card-label" data-i18n="gridSettings">Grid Settings</div>
       <div class="settings-stack">
         <div class="num-row">
           <div class="num-field">
-            <label for="rows">Rows</label>
+            <label for="rows" data-i18n="rowsLabel">Rows</label>
             <input type="number" id="rows" value="12" min="5" max="30">
           </div>
           <div class="num-field">
-            <label for="cols">Columns</label>
+            <label for="cols" data-i18n="colsLabel">Columns</label>
             <input type="number" id="cols" value="12" min="5" max="30">
           </div>
         </div>
@@ -437,7 +497,7 @@
                stroke="currentColor" stroke-width="2.5">
             <polygon points="5 3 19 12 5 21 5 3"/>
           </svg>
-          Generate Puzzle
+          <span data-i18n="generateBtn">Generate Puzzle</span>
         </button>
         <div id="error-box" class="error-box"></div>
       </div>
@@ -445,12 +505,16 @@
 
   </div>
 
+  <!-- Puzzle output -->
   <div id="puzzle-out" class="puzzle-out">
 
     <div class="card puzzle-card">
       <div class="toolbar">
-        <button class="btn btn-outline" id="sol-btn" onclick="toggleSolution()">Show Solution</button>
-        <button class="btn btn-outline" onclick="generate()">↻ Regenerate</button>
+        <button class="btn btn-outline" id="sol-btn" onclick="toggleSolution()"
+                data-i18n="showSolution">Show Solution</button>
+        <button class="btn btn-outline" onclick="generate()">
+          <span data-i18n="regenerate">↻ Regenerate</span>
+        </button>
         <button class="btn btn-outline" onclick="window.print()">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
                stroke="currentColor" stroke-width="2">
@@ -458,7 +522,7 @@
             <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
             <rect x="6" y="14" width="12" height="8"/>
           </svg>
-          Print / Save PDF
+          <span data-i18n="printBtn">Print / Save PDF</span>
         </button>
       </div>
       <div class="grid-scroll">
@@ -468,17 +532,91 @@
     </div>
 
     <div class="card find-panel">
-      <h3>Find these words</h3>
+      <h3 data-i18n="findWords">Find these words</h3>
       <div id="find-chips" class="find-chips"></div>
     </div>
 
   </div>
 
-  <footer class="footer">Created by Or Vanon using Claude Code, 2026</footer>
+  <footer class="footer" data-i18n="footer">Created by Or Vanon using Claude Code, 2026</footer>
 
 </div><!-- /wrap -->
 
 <script>
+  const UI = {
+    en: {
+      title:        'Word Search Generator',
+      subtitle:     'English & Hebrew — language detected automatically',
+      wordsLabel:   'Words',
+      placeholder:  'Type a word, press Enter…',
+      addBtn:       '+ Add',
+      emptyTray:    'No words yet — add some above',
+      clearAll:     'Clear all',
+      gridSettings: 'Grid Settings',
+      rowsLabel:    'Rows',
+      colsLabel:    'Columns',
+      generateBtn:  'Generate Puzzle',
+      showSolution: 'Show Solution',
+      hideSolution: 'Hide Solution',
+      regenerate:   '↻ Regenerate',
+      printBtn:     'Print / Save PDF',
+      findWords:    'Find these words',
+      footer:       'Created by Or Vanon using Claude Code, 2026',
+      errNoWords:   'Add at least one word first.',
+      errTooLong:   w => `Too long for grid: ${w}. Increase rows/cols.`,
+      warnFailed:   w => `Could not place (try a larger grid): ${w}`,
+      wordCount:    n => n === 1 ? '1 word' : `${n} words`,
+    },
+    he: {
+      title:        'גנרטור חיפוש מילים',
+      subtitle:     'עברית ואנגלית — השפה מזוהה אוטומטית',
+      wordsLabel:   'מילים',
+      placeholder:  'הקלד מילה, לחץ Enter…',
+      addBtn:       'הוסף +',
+      emptyTray:    'אין מילים עדיין — הוסף למעלה',
+      clearAll:     'נקה הכל',
+      gridSettings: 'הגדרות לוח',
+      rowsLabel:    'שורות',
+      colsLabel:    'עמודות',
+      generateBtn:  'צור פאזל',
+      showSolution: 'הצג פתרון',
+      hideSolution: 'הסתר פתרון',
+      regenerate:   '↺ צור מחדש',
+      printBtn:     'הדפס / שמור PDF',
+      findWords:    'מצא מילים אלו',
+      footer:       'נוצר על ידי אור ונון באמצעות Claude Code, 2026',
+      errNoWords:   'הוסף לפחות מילה אחת תחילה.',
+      errTooLong:   w => `ארוך מדי ללוח: ${w}. הגדל שורות/עמודות.`,
+      warnFailed:   w => `לא ניתן למקם (נסה לוח גדול יותר): ${w}`,
+      wordCount:    n => n === 1 ? 'מילה אחת' : `${n} מילים`,
+    },
+  };
+
+  let uiLang = 'en';
+
+  function setLang(lang) {
+    uiLang = lang;
+    const t = UI[lang];
+    document.documentElement.lang = lang;
+    document.body.dir = lang === 'he' ? 'rtl' : 'ltr';
+    document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+    document.getElementById('btn-he').classList.toggle('active', lang === 'he');
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const v = t[el.dataset.i18n];
+      if (typeof v === 'string') el.textContent = v;
+    });
+    document.querySelectorAll('[data-i18n-ph]').forEach(el => {
+      const v = t[el.dataset.i18nPh];
+      if (typeof v === 'string') el.placeholder = v;
+    });
+    renderChips();
+    const out = document.getElementById('puzzle-out');
+    if (out.classList.contains('on')) {
+      document.getElementById('sol-btn').textContent =
+        solState.visible ? t.hideSolution : t.showSolution;
+    }
+  }
+
   const ENGLISH_ALPHA = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
   const HEBREW_ALPHA  = 'אבגדהוזחטיכלמנסעפצקרשת';
   const DIRS = [[0,1],[0,-1],[1,0],[-1,0],[1,1],[1,-1],[-1,1],[-1,-1]];
@@ -506,15 +644,8 @@
     renderChips();
   }
 
-  function removeWord(i) {
-    words.splice(i, 1);
-    renderChips();
-  }
-
-  function clearAll() {
-    words = [];
-    renderChips();
-  }
+  function removeWord(i) { words.splice(i, 1); renderChips(); }
+  function clearAll() { words = []; renderChips(); }
 
   function startEdit(i) {
     const chip = document.querySelector(`.chip[data-i="${i}"]`);
@@ -522,13 +653,10 @@
     chip.classList.add('editing');
     chip.innerHTML = `<input class="chip-edit" value="${escHtml(words[i])}" maxlength="30">`;
     const inp = chip.querySelector('input');
-    inp.focus();
-    inp.select();
+    inp.focus(); inp.select();
     const commit = () => {
       const v = inp.value.trim();
-      if (v && !words.some((w, j) => j !== i && w.toLowerCase() === v.toLowerCase())) {
-        words[i] = v;
-      }
+      if (v && !words.some((w, j) => j !== i && w.toLowerCase() === v.toLowerCase())) words[i] = v;
       renderChips();
     };
     inp.addEventListener('blur', commit);
@@ -543,15 +671,19 @@
   }
 
   function renderChips() {
-    const tray = document.getElementById('tray');
+    const tray  = document.getElementById('tray');
     const count = document.getElementById('wcount');
+    const t     = UI[uiLang];
     tray.innerHTML = '';
     if (!words.length) {
-      tray.innerHTML = '<span class="tray-empty">No words yet — add some above</span>';
-      count.textContent = '0 words';
+      const empty = document.createElement('span');
+      empty.className = 'tray-empty';
+      empty.textContent = t.emptyTray;
+      tray.appendChild(empty);
+      count.textContent = t.wordCount(0);
       return;
     }
-    count.textContent = `${words.length} word${words.length === 1 ? '' : 's'}`;
+    count.textContent = t.wordCount(words.length);
     words.forEach((word, i) => {
       const chip = document.createElement('div');
       chip.className = 'chip';
@@ -573,14 +705,10 @@
     return a;
   }
 
-  function detectLang(list) {
-    return list.some(w => /[א-ת]/.test(w)) ? 'he' : 'en';
-  }
+  function detectLang(list) { return list.some(w => /[א-ת]/.test(w)) ? 'he' : 'en'; }
 
   function cleanWord(word, lang) {
-    return lang === 'he'
-      ? word.replace(/[^א-ת]/g, '')
-      : word.toUpperCase().replace(/[^A-Z]/g, '');
+    return lang === 'he' ? word.replace(/[^א-ת]/g, '') : word.toUpperCase().replace(/[^A-Z]/g, '');
   }
 
   function canPlace(grid, word, r, c, dr, dc, rows, cols) {
@@ -621,19 +749,17 @@
   }
 
   function generate() {
+    const t = UI[uiLang];
     setError('');
-    if (!words.length) { setError('Add at least one word first.'); return; }
+    if (!words.length) { setError(t.errNoWords); return; }
 
     const rows = Math.max(5, Math.min(30, parseInt(document.getElementById('rows').value) || 12));
     const cols = Math.max(5, Math.min(30, parseInt(document.getElementById('cols').value) || 12));
-    const lang = detectLang(words);
-    const cleaned = words.map(w => cleanWord(w, lang)).filter(w => w.length > 0);
+    const puzzleLang = detectLang(words);
+    const cleaned = words.map(w => cleanWord(w, puzzleLang)).filter(w => w.length > 0);
 
     const tooLong = cleaned.filter(w => w.length > Math.max(rows, cols));
-    if (tooLong.length) {
-      setError(`Too long for grid: ${tooLong.join(', ')}. Increase rows/cols.`);
-      return;
-    }
+    if (tooLong.length) { setError(t.errTooLong(tooLong.join(', '))); return; }
 
     const grid = Array.from({ length: rows }, () => Array(cols).fill(null));
     const sorted = shuffle(cleaned).sort((a, b) => b.length - a.length);
@@ -646,7 +772,7 @@
       else failed.push(word);
     }
 
-    const alpha = lang === 'he' ? HEBREW_ALPHA : ENGLISH_ALPHA;
+    const alpha = puzzleLang === 'he' ? HEBREW_ALPHA : ENGLISH_ALPHA;
     const alphaArr = [...alpha];
     for (let r = 0; r < rows; r++) {
       for (let c = 0; c < cols; c++) {
@@ -663,27 +789,27 @@
     }
 
     solState = { visible: false, cells: solCells };
-    renderGrid(grid, rows, cols, lang);
-    renderFindChips(placed, lang);
+    renderGrid(grid, rows, cols, puzzleLang);
+    renderFindChips(placed, puzzleLang);
 
     const warn = document.getElementById('warn-box');
     if (failed.length) {
-      warn.textContent = `Could not place (try a larger grid): ${failed.join(', ')}`;
+      warn.textContent = t.warnFailed(failed.join(', '));
       warn.classList.add('on');
     } else {
       warn.classList.remove('on');
     }
 
-    document.getElementById('sol-btn').textContent = 'Show Solution';
+    document.getElementById('sol-btn').textContent = t.showSolution;
     const out = document.getElementById('puzzle-out');
     out.classList.add('on');
     out.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }
 
-  function renderGrid(grid, rows, cols, lang) {
+  function renderGrid(grid, rows, cols, puzzleLang) {
     const table = document.getElementById('grid');
     table.innerHTML = '';
-    table.dir = lang === 'he' ? 'rtl' : 'ltr';
+    table.dir = puzzleLang === 'he' ? 'rtl' : 'ltr';
     for (let r = 0; r < rows; r++) {
       const tr = document.createElement('tr');
       for (let c = 0; c < cols; c++) {
@@ -696,10 +822,10 @@
     }
   }
 
-  function renderFindChips(list, lang) {
+  function renderFindChips(list, puzzleLang) {
     const container = document.getElementById('find-chips');
     container.innerHTML = '';
-    container.dir = lang === 'he' ? 'rtl' : 'ltr';
+    container.dir = puzzleLang === 'he' ? 'rtl' : 'ltr';
     list.forEach(word => {
       const el = document.createElement('div');
       el.className = 'find-chip';
@@ -709,13 +835,14 @@
   }
 
   function toggleSolution() {
+    const t = UI[uiLang];
     solState.visible = !solState.visible;
     document.querySelectorAll('#grid td').forEach(td => {
       if (solState.cells.has(td.dataset.pos))
         td.classList.toggle('solved', solState.visible);
     });
     document.getElementById('sol-btn').textContent =
-      solState.visible ? 'Hide Solution' : 'Show Solution';
+      solState.visible ? t.hideSolution : t.showSolution;
   }
 </script>
 </body>
