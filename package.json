@@ -1,0 +1,15 @@
+{
+  "name": "jigsaw-generator",
+  "version": "2.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Word search puzzle generator with a synced cloud library and an iPad-friendly play mode.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/orvanon/Jigsaw-generator.git"
+  },
+  "license": "ISC",
+  "dependencies": {
+    "@vercel/blob": "^2.4.0"
+  }
+}

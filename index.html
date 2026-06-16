@@ -2,8 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Word Search Generator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#6366f1">
+  <title>Word Search Studio</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
@@ -18,8 +19,10 @@
       --text: #1e293b;
       --muted: #64748b;
       --danger: #ef4444;
+      --ok: #16a34a;
       --radius: 14px;
       --radius-sm: 8px;
+      --control-h: 40px;
       --shadow: 0 1px 4px rgba(0,0,0,.06), 0 4px 16px rgba(0,0,0,.06);
     }
 
@@ -30,19 +33,68 @@
       background: var(--bg);
       color: var(--text);
       min-height: 100vh;
-      padding: 2.5rem 1rem 5rem;
+      padding: 1.5rem 1rem 5rem;
+      -webkit-tap-highlight-color: transparent;
     }
+
+    .wrap { max-width: 980px; margin: 0 auto; }
+
+    /* ── Top bar ── */
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .brand {
+      font-size: 1.4rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      white-space: nowrap;
+    }
+
+    .topbar-right { display: flex; align-items: center; gap: .75rem; }
+
+    /* ── Nav tabs ── */
+    .nav {
+      display: flex;
+      gap: .25rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: .25rem;
+      box-shadow: var(--shadow);
+    }
+
+    .nav-btn {
+      height: 34px;
+      padding: 0 1rem;
+      border: none;
+      border-radius: 999px;
+      background: transparent;
+      color: var(--muted);
+      font: inherit;
+      font-size: .85rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background .15s, color .15s;
+      white-space: nowrap;
+    }
+    .nav-btn.active { background: var(--accent); color: #fff; }
+    .nav-btn:not(.active):hover { color: var(--accent); }
 
     /* ── Lang toggle ── */
-    .lang-toggle {
-      display: flex;
-      justify-content: center;
-      gap: .25rem;
-      margin-bottom: 1.25rem;
-    }
-
+    .lang-toggle { display: flex; gap: .25rem; }
     .lang-btn {
-      padding: .3rem .9rem;
+      height: 34px;
+      width: 42px;
       border: 1.5px solid var(--border);
       border-radius: 999px;
       background: var(--surface);
@@ -50,41 +102,17 @@
       font: inherit;
       font-size: .8rem;
       font-weight: 700;
-      letter-spacing: .04em;
       cursor: pointer;
       transition: background .15s, border-color .15s, color .15s;
     }
+    .lang-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .lang-btn:not(.active):hover { border-color: var(--accent); color: var(--accent); }
 
-    .lang-btn.active {
-      background: var(--accent);
-      border-color: var(--accent);
-      color: #fff;
-    }
+    /* ── Views ── */
+    .view { display: none; }
+    .view.on { display: block; }
 
-    .lang-btn:not(.active):hover {
-      border-color: var(--accent);
-      color: var(--accent);
-    }
-
-    /* ── Header ── */
-    .header { text-align: center; margin-bottom: 2.5rem; }
-
-    .header h1 {
-      font-size: 2.25rem;
-      font-weight: 800;
-      background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      margin-bottom: 0.4rem;
-      letter-spacing: -0.02em;
-    }
-
-    .header p { color: var(--muted); font-size: 0.95rem; }
-
-    /* ── Layout ── */
-    .wrap { max-width: 980px; margin: 0 auto; }
-
+    /* ── Layout (create) ── */
     .top-grid {
       display: grid;
       grid-template-columns: 1fr 280px;
@@ -92,7 +120,6 @@
       margin-bottom: 1.25rem;
       align-items: start;
     }
-
     @media (max-width: 680px) { .top-grid { grid-template-columns: 1fr; } }
 
     /* ── Card ── */
@@ -118,7 +145,8 @@
 
     .add-input {
       flex: 1;
-      padding: .6rem .875rem;
+      height: var(--control-h);
+      padding: 0 .875rem;
       border: 1.5px solid var(--border);
       border-radius: var(--radius-sm);
       font: inherit;
@@ -127,17 +155,8 @@
       transition: border-color .15s, box-shadow .15s;
       background: #fafbff;
     }
-
-    .add-input:focus {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px var(--accent-ring);
-      background: #fff;
-    }
-
-    .add-input.shake {
-      animation: shake .3s ease;
-      border-color: var(--danger) !important;
-    }
+    .add-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-ring); background: #fff; }
+    .add-input.shake { animation: shake .3s ease; border-color: var(--danger) !important; }
 
     @keyframes shake {
       0%,100% { transform: translateX(0); }
@@ -158,7 +177,6 @@
       align-content: flex-start;
       transition: border-color .2s;
     }
-
     .tray:focus-within { border-color: var(--accent); }
 
     .tray-empty {
@@ -186,7 +204,6 @@
       animation: pop .18s ease;
       transition: background .15s;
     }
-
     [dir="rtl"] .chip { padding: .28rem .75rem .28rem .55rem; }
 
     @keyframes pop {
@@ -205,235 +222,255 @@
       box-shadow: 0 0 0 3px var(--accent-ring);
       padding: .2rem .55rem;
     }
-
     .chip-edit {
-      border: none;
-      outline: none;
-      background: transparent;
-      font: inherit;
-      font-size: .875rem;
-      font-weight: 700;
-      color: #4338ca;
-      width: 80px;
+      border: none; outline: none; background: transparent;
+      font: inherit; font-size: .875rem; font-weight: 700; color: #4338ca; width: 80px;
     }
 
     .chip-del {
-      width: 1.15rem;
-      height: 1.15rem;
-      border-radius: 50%;
-      border: none;
-      background: #c7d2fe;
-      color: #4338ca;
-      font-size: .6rem;
-      line-height: 1;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
+      width: 1.15rem; height: 1.15rem; border-radius: 50%;
+      border: none; background: #c7d2fe; color: #4338ca;
+      font-size: .6rem; line-height: 1; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
       transition: background .15s, color .15s;
     }
-
     .chip-del:hover { background: var(--danger); color: #fff; }
 
     /* ── Tray footer ── */
-    .tray-footer {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-top: .625rem;
-    }
-
+    .tray-footer { display: flex; justify-content: space-between; align-items: center; margin-top: .625rem; }
     .word-count { font-size: .8rem; color: var(--muted); }
 
     /* ── Buttons ── */
     .btn {
-      display: inline-flex;
-      align-items: center;
-      gap: .35rem;
-      padding: .6rem 1.2rem;
-      border: none;
-      border-radius: var(--radius-sm);
-      font: inherit;
-      font-size: .9rem;
-      font-weight: 600;
+      display: inline-flex; align-items: center; justify-content: center; gap: .35rem;
+      height: var(--control-h);
+      padding: 0 1.2rem;
+      border: none; border-radius: var(--radius-sm);
+      font: inherit; font-size: .9rem; font-weight: 600;
       cursor: pointer;
       transition: background .15s, box-shadow .15s, filter .15s, transform .1s;
       white-space: nowrap;
     }
-
     .btn:active { transform: scale(.97); }
+    .btn:disabled { opacity: .55; cursor: default; }
 
     .btn-accent { background: var(--accent); color: #fff; }
-    .btn-accent:hover { background: var(--accent-dark); }
+    .btn-accent:hover:not(:disabled) { background: var(--accent-dark); }
 
     .btn-generate {
       width: 100%;
-      justify-content: center;
       background: linear-gradient(135deg, #6366f1, #a855f7);
       color: #fff;
-      padding: .75rem;
+      height: 46px;
       font-size: 1rem;
       box-shadow: 0 2px 10px #6366f138;
     }
     .btn-generate:hover { filter: brightness(1.07); box-shadow: 0 4px 18px #6366f148; }
 
     .btn-ghost {
-      background: transparent;
-      color: var(--danger);
-      font-size: .8rem;
-      padding: .25rem .6rem;
-      border-radius: 6px;
+      background: transparent; color: var(--danger);
+      height: auto; font-size: .8rem; padding: .3rem .6rem; border-radius: 6px;
     }
     .btn-ghost:hover { background: #fef2f2; }
 
     .btn-outline {
-      background: var(--surface);
-      color: var(--muted);
-      border: 1.5px solid var(--border);
-      font-size: .875rem;
-      padding: .5rem 1rem;
+      background: var(--surface); color: var(--muted);
+      border: 1.5px solid var(--border); font-size: .875rem; padding: 0 1rem;
     }
     .btn-outline:hover { background: #f1f5f9; color: var(--text); }
+
+    .btn-ok { background: var(--ok); color: #fff; }
+    .btn-ok:hover:not(:disabled) { filter: brightness(1.06); }
 
     /* ── Settings card ── */
     .settings-stack { display: flex; flex-direction: column; gap: 1rem; }
     .num-row { display: flex; gap: .875rem; }
     .num-field { flex: 1; }
-
-    .num-field label {
-      display: block;
-      font-size: .78rem;
-      font-weight: 600;
-      color: var(--muted);
-      margin-bottom: .35rem;
-    }
-
+    .num-field label { display: block; font-size: .78rem; font-weight: 600; color: var(--muted); margin-bottom: .35rem; }
     .num-field input {
-      width: 100%;
-      padding: .6rem .75rem;
-      border: 1.5px solid var(--border);
-      border-radius: var(--radius-sm);
-      font: inherit;
-      font-size: 1rem;
-      outline: none;
-      background: #fafbff;
+      width: 100%; height: var(--control-h); padding: 0 .75rem;
+      border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+      font: inherit; font-size: 1rem; outline: none; background: #fafbff;
       transition: border-color .15s, box-shadow .15s;
     }
-
-    .num-field input:focus {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px var(--accent-ring);
-    }
+    .num-field input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-ring); }
 
     .error-box {
-      display: none;
-      background: #fef2f2;
-      border: 1px solid #fecaca;
-      color: #dc2626;
-      border-radius: var(--radius-sm);
-      padding: .6rem .875rem;
-      font-size: .85rem;
+      display: none; background: #fef2f2; border: 1px solid #fecaca; color: #dc2626;
+      border-radius: var(--radius-sm); padding: .6rem .875rem; font-size: .85rem;
     }
     .error-box.on { display: block; }
 
-    /* ── Puzzle output ── */
-    .puzzle-out {
-      display: none;
-      gap: 1.25rem;
-      flex-wrap: wrap;
-      align-items: flex-start;
-    }
+    /* ── Puzzle output (create preview) ── */
+    .puzzle-out { display: none; gap: 1.25rem; flex-wrap: wrap; align-items: flex-start; }
     .puzzle-out.on { display: flex; }
-
     .puzzle-card { flex: 1; min-width: 0; }
 
-    .toolbar {
-      display: flex;
-      gap: .5rem;
-      margin-bottom: 1.125rem;
-      flex-wrap: wrap;
-    }
+    .toolbar { display: flex; gap: .5rem; margin-bottom: 1.125rem; flex-wrap: wrap; align-items: center; }
+
+    .save-row { display: flex; gap: .5rem; align-items: center; flex: 1; min-width: 220px; }
+    .save-row .add-input { min-width: 0; }
 
     .grid-scroll { overflow-x: auto; }
 
-    table { border-collapse: collapse; }
-
-    td {
-      width: 2.25rem;
-      height: 2.25rem;
-      text-align: center;
-      vertical-align: middle;
-      font-size: 1rem;
-      font-weight: 700;
-      border: 1px solid #e2e8f0;
-      user-select: none;
+    table.grid { border-collapse: collapse; }
+    table.grid td {
+      width: 2.25rem; height: 2.25rem; text-align: center; vertical-align: middle;
+      font-size: 1rem; font-weight: 700; border: 1px solid #e2e8f0; user-select: none;
       transition: background .2s;
     }
-
-    td.solved { background: #fde68a; color: #92400e; }
+    table.grid td.solved { background: #fde68a; color: #92400e; }
 
     /* ── Find-words panel ── */
     .find-panel { width: 210px; flex-shrink: 0; }
-
     @media (max-width: 580px) { .find-panel { width: 100%; } }
-
     .find-panel h3 {
-      font-size: .7rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: .1em;
-      color: var(--muted);
-      margin-bottom: .875rem;
+      font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .1em;
+      color: var(--muted); margin-bottom: .875rem;
     }
-
     .find-chips { display: flex; flex-wrap: wrap; gap: .4rem; }
-
     .find-chip {
-      background: #f0fdf4;
-      border: 1.5px solid #bbf7d0;
-      color: #166534;
-      border-radius: 999px;
-      padding: .22rem .7rem;
-      font-size: .8rem;
-      font-weight: 700;
+      background: #f0fdf4; border: 1.5px solid #bbf7d0; color: #166534;
+      border-radius: 999px; padding: .22rem .7rem; font-size: .8rem; font-weight: 700;
     }
 
     .warn-box {
-      display: none;
-      margin-top: .875rem;
-      padding: .55rem .75rem;
-      background: #fffbeb;
-      border: 1px solid #fde68a;
-      border-radius: var(--radius-sm);
-      font-size: .8rem;
-      color: #b45309;
+      display: none; margin-top: .875rem; padding: .55rem .75rem;
+      background: #fffbeb; border: 1px solid #fde68a; border-radius: var(--radius-sm);
+      font-size: .8rem; color: #b45309;
     }
     .warn-box.on { display: block; }
 
-    /* ── Footer ── */
-    .footer {
-      text-align: center;
-      margin-top: 3rem;
-      color: #94a3b8;
-      font-size: .8rem;
+    /* ── Library ── */
+    .lib-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; gap: 1rem; }
+    .lib-head h2 { font-size: 1.15rem; font-weight: 800; }
+    .lib-sub { color: var(--muted); font-size: .85rem; margin-top: .15rem; }
+
+    .lib-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 1rem;
     }
+
+    .pz-card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+      box-shadow: var(--shadow); padding: 1.1rem; display: flex; flex-direction: column; gap: .7rem;
+    }
+    .pz-top { display: flex; justify-content: space-between; align-items: flex-start; gap: .5rem; }
+    .pz-name { font-weight: 800; font-size: 1.02rem; word-break: break-word; }
+    .pz-badges { display: flex; gap: .35rem; flex-wrap: wrap; }
+    .badge {
+      font-size: .68rem; font-weight: 700; letter-spacing: .03em;
+      padding: .15rem .5rem; border-radius: 999px; background: var(--accent-light); color: #4338ca;
+      white-space: nowrap;
+    }
+    .badge.lang { background: #ecfeff; color: #0e7490; }
+    .badge.done { background: #dcfce7; color: #15803d; }
+    .pz-meta { font-size: .78rem; color: var(--muted); }
+    .pz-actions { display: flex; gap: .5rem; margin-top: .2rem; }
+    .pz-actions .btn { flex: 1; height: 38px; padding: 0 .6rem; }
+
+    .lib-state {
+      text-align: center; color: var(--muted); padding: 3rem 1rem; font-size: .95rem;
+    }
+    .lib-state .big { font-size: 2.5rem; display: block; margin-bottom: .5rem; }
+    .spinner {
+      width: 28px; height: 28px; border: 3px solid var(--accent-light);
+      border-top-color: var(--accent); border-radius: 50%;
+      animation: spin .8s linear infinite; margin: 0 auto 1rem;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Play view ── */
+    .play-head { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 1.1rem; flex-wrap: wrap; }
+    .play-title { font-size: 1.2rem; font-weight: 800; }
+    .play-progress { font-size: .9rem; font-weight: 700; color: var(--accent-dark); }
+
+    .play-layout { display: flex; gap: 1.25rem; flex-wrap: wrap; align-items: flex-start; }
+    .play-board { flex: 1; min-width: 0; display: flex; justify-content: center; }
+
+    table.pgrid {
+      border-collapse: collapse;
+      touch-action: none;
+      user-select: none; -webkit-user-select: none;
+      -webkit-touch-callout: none;
+      margin: 0 auto;
+    }
+    table.pgrid td {
+      width: clamp(2rem, 9.5vw, 3.1rem);
+      height: clamp(2rem, 9.5vw, 3.1rem);
+      text-align: center; vertical-align: middle;
+      font-size: clamp(1rem, 4.4vw, 1.5rem);
+      font-weight: 700; border: 1px solid #e2e8f0; color: var(--text);
+      transition: background .08s, color .08s, transform .08s;
+    }
+    table.pgrid td.sel { background: var(--accent); color: #fff; transform: scale(1.04); border-radius: 6px; }
+    table.pgrid td.found { color: #1e293b; }
+
+    .play-side { width: 230px; flex-shrink: 0; }
+    @media (max-width: 620px) { .play-side { width: 100%; } }
+    .play-side h3 {
+      font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .1em;
+      color: var(--muted); margin-bottom: .875rem;
+    }
+    .find-list { display: flex; flex-wrap: wrap; gap: .45rem; }
+    .find-word {
+      background: var(--surface); border: 1.5px solid var(--border); color: var(--text);
+      border-radius: 999px; padding: .3rem .8rem; font-size: .95rem; font-weight: 700;
+      transition: all .2s;
+    }
+    .find-word.done {
+      text-decoration: line-through; color: #94a3b8; border-color: #e2e8f0; background: #f8fafc;
+    }
+    .find-word.done::before { content: "✓ "; color: var(--ok); text-decoration: none; -webkit-text-decoration: none; }
+
+    .play-empty { text-align: center; color: var(--muted); padding: 3rem 1rem; }
+    .play-empty .big { font-size: 2.5rem; display: block; margin-bottom: .6rem; }
+
+    /* ── Win overlay ── */
+    .win-overlay {
+      position: fixed; inset: 0; background: rgba(30,41,59,.55);
+      display: none; align-items: center; justify-content: center; z-index: 50; padding: 1rem;
+      backdrop-filter: blur(3px);
+    }
+    .win-overlay.on { display: flex; animation: fade .2s ease; }
+    @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+    .win-card {
+      background: var(--surface); border-radius: 20px; padding: 2.5rem 2rem; text-align: center;
+      max-width: 360px; width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,.25);
+      animation: pop .3s ease;
+    }
+    .win-card .emoji { font-size: 4rem; display: block; margin-bottom: .5rem; animation: bounce 1s ease infinite; }
+    @keyframes bounce { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+    .win-card h2 { font-size: 1.6rem; font-weight: 800; margin-bottom: .4rem; }
+    .win-card p { color: var(--muted); margin-bottom: 1.5rem; }
+    .win-actions { display: flex; gap: .6rem; }
+    .win-actions .btn { flex: 1; }
+
+    /* ── Toast ── */
+    .toast {
+      position: fixed; left: 50%; bottom: 1.5rem; transform: translateX(-50%) translateY(120%);
+      background: #1e293b; color: #fff; padding: .7rem 1.2rem; border-radius: 999px;
+      font-size: .9rem; font-weight: 600; box-shadow: 0 8px 24px rgba(0,0,0,.2);
+      z-index: 60; transition: transform .3s ease; max-width: 90vw;
+    }
+    .toast.on { transform: translateX(-50%) translateY(0); }
+    .toast.err { background: #b91c1c; }
+    .toast.ok { background: #15803d; }
+
+    /* ── Footer ── */
+    .footer { text-align: center; margin-top: 3rem; color: #94a3b8; font-size: .8rem; }
 
     /* ── Print ── */
     @media print {
       body { background: #fff; padding: .5rem; }
-      .lang-toggle, .header, .top-grid, .toolbar, .warn-box { display: none !important; }
+      .topbar, .top-grid, .toolbar, .warn-box, .nav, .lang-toggle { display: none !important; }
+      #view-library, #view-play { display: none !important; }
       .puzzle-out { display: flex !important; gap: 1.5rem; }
-      .puzzle-card, .find-panel {
-        box-shadow: none !important;
-        border: none !important;
-        padding: 0 !important;
-      }
-      td { border-color: #999 !important; }
-      td.solved {
-        background: #fde68a !important;
-        -webkit-print-color-adjust: exact;
-        print-color-adjust: exact;
+      .puzzle-card, .find-panel { box-shadow: none !important; border: none !important; padding: 0 !important; }
+      table.grid td { border-color: #999 !important; }
+      table.grid td.solved {
+        background: #fde68a !important; -webkit-print-color-adjust: exact; print-color-adjust: exact;
       }
       .footer { margin-top: 1.5rem; }
     }
@@ -442,153 +479,240 @@
 <body>
 <div class="wrap">
 
-  <!-- Language toggle -->
-  <div class="lang-toggle">
-    <button id="btn-en" class="lang-btn active" onclick="setLang('en')">EN</button>
-    <button id="btn-he" class="lang-btn" onclick="setLang('he')">&#x05E2;&#x05D1;</button>
-  </div>
-
-  <div class="header">
-    <h1 data-i18n="title">Word Search Generator</h1>
-    <p data-i18n="subtitle">English &amp; Hebrew &mdash; language detected automatically</p>
-  </div>
-
-  <div class="top-grid">
-
-    <!-- Word manager -->
-    <div class="card">
-      <div class="card-label" data-i18n="wordsLabel">Words</div>
-      <div class="add-row">
-        <input id="word-input" class="add-input" type="text"
-               data-i18n-ph="placeholder"
-               placeholder="Type a word, press Enter…"
-               autocomplete="off" spellcheck="false">
-        <button class="btn btn-accent" onclick="addWord()">
-          <span data-i18n="addBtn">+ Add</span>
-        </button>
+  <!-- Top bar -->
+  <div class="topbar">
+    <div class="brand" data-i18n="brand">Word Search Studio</div>
+    <div class="topbar-right">
+      <div class="nav">
+        <button class="nav-btn active" data-view="create" data-i18n="navCreate">Create</button>
+        <button class="nav-btn" data-view="library" data-i18n="navLibrary">Library</button>
+        <button class="nav-btn" data-view="play" data-i18n="navPlay">Play</button>
       </div>
-      <div id="tray" class="tray">
-        <span class="tray-empty" data-i18n="emptyTray">No words yet — add some above</span>
-      </div>
-      <div class="tray-footer">
-        <span id="wcount" class="word-count">0</span>
-        <button class="btn btn-ghost" onclick="clearAll()">
-          <span data-i18n="clearAll">Clear all</span>
-        </button>
+      <div class="lang-toggle">
+        <button id="btn-en" class="lang-btn active" onclick="setLang('en')">EN</button>
+        <button id="btn-he" class="lang-btn" onclick="setLang('he')">עב</button>
       </div>
     </div>
+  </div>
 
-    <!-- Settings -->
-    <div class="card">
-      <div class="card-label" data-i18n="gridSettings">Grid Settings</div>
-      <div class="settings-stack">
-        <div class="num-row">
-          <div class="num-field">
-            <label for="rows" data-i18n="rowsLabel">Rows</label>
-            <input type="number" id="rows" value="12" min="5" max="30">
-          </div>
-          <div class="num-field">
-            <label for="cols" data-i18n="colsLabel">Columns</label>
-            <input type="number" id="cols" value="12" min="5" max="30">
-          </div>
+  <!-- ════════ CREATE VIEW ════════ -->
+  <section id="view-create" class="view on">
+    <div class="top-grid">
+      <!-- Word manager -->
+      <div class="card">
+        <div class="card-label" data-i18n="wordsLabel">Words</div>
+        <div class="add-row">
+          <input id="word-input" class="add-input" type="text"
+                 data-i18n-ph="placeholder" placeholder="Type a word, press Enter…"
+                 autocomplete="off" spellcheck="false">
+          <button class="btn btn-accent" onclick="addWord()"><span data-i18n="addBtn">+ Add</span></button>
         </div>
-        <button class="btn btn-generate" onclick="generate()">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
-               stroke="currentColor" stroke-width="2.5">
-            <polygon points="5 3 19 12 5 21 5 3"/>
-          </svg>
-          <span data-i18n="generateBtn">Generate Puzzle</span>
-        </button>
-        <div id="error-box" class="error-box"></div>
+        <div id="tray" class="tray">
+          <span class="tray-empty" data-i18n="emptyTray">No words yet — add some above</span>
+        </div>
+        <div class="tray-footer">
+          <span id="wcount" class="word-count">0</span>
+          <button class="btn btn-ghost" onclick="clearAll()"><span data-i18n="clearAll">Clear all</span></button>
+        </div>
+      </div>
+
+      <!-- Settings -->
+      <div class="card">
+        <div class="card-label" data-i18n="gridSettings">Grid Settings</div>
+        <div class="settings-stack">
+          <div class="num-row">
+            <div class="num-field">
+              <label for="rows" data-i18n="rowsLabel">Rows</label>
+              <input type="number" id="rows" value="12" min="5" max="30">
+            </div>
+            <div class="num-field">
+              <label for="cols" data-i18n="colsLabel">Columns</label>
+              <input type="number" id="cols" value="12" min="5" max="30">
+            </div>
+          </div>
+          <button class="btn btn-generate" onclick="generate()">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polygon points="5 3 19 12 5 21 5 3"/>
+            </svg>
+            <span data-i18n="generateBtn">Generate Puzzle</span>
+          </button>
+          <div id="error-box" class="error-box"></div>
+        </div>
       </div>
     </div>
 
-  </div>
-
-  <!-- Puzzle output -->
-  <div id="puzzle-out" class="puzzle-out">
-
-    <div class="card puzzle-card">
-      <div class="toolbar">
-        <button class="btn btn-outline" id="sol-btn" onclick="toggleSolution()"
-                data-i18n="showSolution">Show Solution</button>
-        <button class="btn btn-outline" onclick="generate()">
-          <span data-i18n="regenerate">↻ Regenerate</span>
-        </button>
-        <button class="btn btn-outline" onclick="window.print()">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-               stroke="currentColor" stroke-width="2">
-            <polyline points="6 9 6 2 18 2 18 9"/>
-            <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
-            <rect x="6" y="14" width="12" height="8"/>
-          </svg>
-          <span data-i18n="printBtn">Print / Save PDF</span>
-        </button>
+    <!-- Puzzle preview -->
+    <div id="puzzle-out" class="puzzle-out">
+      <div class="card puzzle-card">
+        <div class="toolbar">
+          <div class="save-row">
+            <input id="save-name" class="add-input" type="text" data-i18n-ph="namePh" placeholder="Puzzle name…" autocomplete="off">
+            <button class="btn btn-ok" id="save-btn" onclick="saveCurrent()"><span data-i18n="saveBtn">Save</span></button>
+          </div>
+          <button class="btn btn-outline" id="sol-btn" onclick="toggleSolution()" data-i18n="showSolution">Show Solution</button>
+          <button class="btn btn-outline" onclick="generate()"><span data-i18n="regenerate">↻ Regenerate</span></button>
+          <button class="btn btn-outline" onclick="window.print()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 6 2 18 2 18 9"/>
+              <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+              <rect x="6" y="14" width="12" height="8"/>
+            </svg>
+            <span data-i18n="printBtn">Print / Save PDF</span>
+          </button>
+        </div>
+        <div class="grid-scroll"><table id="grid" class="grid"></table></div>
+        <div id="warn-box" class="warn-box"></div>
       </div>
-      <div class="grid-scroll">
-        <table id="grid"></table>
+      <div class="card find-panel">
+        <h3 data-i18n="findWords">Find these words</h3>
+        <div id="find-chips" class="find-chips"></div>
       </div>
-      <div id="warn-box" class="warn-box"></div>
     </div>
+  </section>
 
-    <div class="card find-panel">
-      <h3 data-i18n="findWords">Find these words</h3>
-      <div id="find-chips" class="find-chips"></div>
+  <!-- ════════ LIBRARY VIEW ════════ -->
+  <section id="view-library" class="view">
+    <div class="lib-head">
+      <div>
+        <h2 data-i18n="libTitle">Saved puzzles</h2>
+        <div class="lib-sub" data-i18n="libSub">Synced across all your devices</div>
+      </div>
+      <button class="btn btn-outline" onclick="loadLibrary()"><span data-i18n="refresh">↻ Refresh</span></button>
     </div>
+    <div id="lib-body"></div>
+  </section>
 
-  </div>
+  <!-- ════════ PLAY VIEW ════════ -->
+  <section id="view-play" class="view">
+    <div id="play-empty" class="play-empty">
+      <span class="big">🧩</span>
+      <p data-i18n="playEmpty">Pick a puzzle from your Library to start playing.</p>
+      <br>
+      <button class="btn btn-accent" onclick="switchView('library')"><span data-i18n="goLibrary">Go to Library</span></button>
+    </div>
+    <div id="play-main" style="display:none">
+      <div class="play-head">
+        <button class="btn btn-outline" onclick="switchView('library')"><span data-i18n="backLib">← Library</span></button>
+        <div class="play-title" id="play-title"></div>
+        <div class="play-progress" id="play-progress"></div>
+      </div>
+      <div class="play-layout">
+        <div class="play-board"><table id="pgrid" class="pgrid"></table></div>
+        <div class="card play-side">
+          <h3 data-i18n="findWords">Find these words</h3>
+          <div id="find-list" class="find-list"></div>
+          <button class="btn btn-ghost" style="margin-top:1rem" onclick="resetPlay()"><span data-i18n="resetBtn">Reset progress</span></button>
+        </div>
+      </div>
+    </div>
+  </section>
 
   <footer class="footer" data-i18n="footer">Created by Or Vanon using Claude Code, 2026</footer>
+</div>
 
-</div><!-- /wrap -->
+<!-- Win overlay -->
+<div id="win-overlay" class="win-overlay">
+  <div class="win-card">
+    <span class="emoji">🎉</span>
+    <h2 data-i18n="winTitle">You found them all!</h2>
+    <p id="win-msg" data-i18n="winMsg">Amazing work!</p>
+    <div class="win-actions">
+      <button class="btn btn-outline" onclick="resetPlay()"><span data-i18n="playAgain">Play again</span></button>
+      <button class="btn btn-accent" onclick="closeWin();switchView('library')"><span data-i18n="backLib">← Library</span></button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
 
 <script>
+  // ── Translations ─────────────────────────────────────────────────
   const UI = {
     en: {
-      title:        'Word Search Generator',
-      subtitle:     'English & Hebrew — language detected automatically',
-      wordsLabel:   'Words',
-      placeholder:  'Type a word, press Enter…',
-      addBtn:       '+ Add',
-      emptyTray:    'No words yet — add some above',
-      clearAll:     'Clear all',
+      brand: 'Word Search Studio',
+      navCreate: 'Create', navLibrary: 'Library', navPlay: 'Play',
+      wordsLabel: 'Words',
+      placeholder: 'Type a word, press Enter…',
+      addBtn: '+ Add',
+      emptyTray: 'No words yet — add some above',
+      clearAll: 'Clear all',
       gridSettings: 'Grid Settings',
-      rowsLabel:    'Rows',
-      colsLabel:    'Columns',
-      generateBtn:  'Generate Puzzle',
-      showSolution: 'Show Solution',
-      hideSolution: 'Hide Solution',
-      regenerate:   '↻ Regenerate',
-      printBtn:     'Print / Save PDF',
-      findWords:    'Find these words',
-      footer:       'Created by Or Vanon using Claude Code, 2026',
-      errNoWords:   'Add at least one word first.',
-      errTooLong:   w => `Too long for grid: ${w}. Increase rows/cols.`,
-      warnFailed:   w => `Could not place (try a larger grid): ${w}`,
-      wordCount:    n => n === 1 ? '1 word' : `${n} words`,
+      rowsLabel: 'Rows', colsLabel: 'Columns',
+      generateBtn: 'Generate Puzzle',
+      showSolution: 'Show Solution', hideSolution: 'Hide Solution',
+      regenerate: '↻ Regenerate',
+      printBtn: 'Print / Save PDF',
+      findWords: 'Find these words',
+      namePh: 'Puzzle name…', saveBtn: 'Save',
+      libTitle: 'Saved puzzles', libSub: 'Synced across all your devices',
+      refresh: '↻ Refresh',
+      libEmpty: 'No saved puzzles yet. Create one and tap Save!',
+      libLoading: 'Loading your library…',
+      libError: 'Could not load the library. Check your connection and try again.',
+      playBtn: 'Play', deleteBtn: 'Delete',
+      playEmpty: 'Pick a puzzle from your Library to start playing.',
+      goLibrary: 'Go to Library',
+      backLib: '← Library',
+      resetBtn: 'Reset progress',
+      winTitle: 'You found them all!', winMsg: 'Amazing work!',
+      playAgain: 'Play again',
+      footer: 'Created by Or Vanon using Claude Code, 2026',
+      errNoWords: 'Add at least one word first.',
+      errTooLong: w => `Too long for grid: ${w}. Increase rows/cols.`,
+      warnFailed: w => `Could not place (try a larger grid): ${w}`,
+      wordCount: n => n === 1 ? '1 word' : `${n} words`,
+      wordsN: n => n === 1 ? '1 word' : `${n} words`,
+      progress: (a, b) => `${a} / ${b} found`,
+      savedToast: 'Saved to library ✓',
+      deletedToast: 'Puzzle deleted',
+      nameRequired: 'Please name the puzzle first.',
+      saveError: 'Save failed — check your connection.',
+      deleteError: 'Delete failed — try again.',
+      confirmDelete: name => `Delete “${name}”?`,
+      generateFirst: 'Generate a puzzle first.',
     },
     he: {
-      title:        'גנרטור חיפוש מילים',
-      subtitle:     'עברית ואנגלית — השפה מזוהה אוטומטית',
-      wordsLabel:   'מילים',
-      placeholder:  'הקלד מילה, לחץ Enter…',
-      addBtn:       'הוסף +',
-      emptyTray:    'אין מילים עדיין — הוסף למעלה',
-      clearAll:     'נקה הכל',
+      brand: 'סטודיו חיפוש מילים',
+      navCreate: 'יצירה', navLibrary: 'ספרייה', navPlay: 'משחק',
+      wordsLabel: 'מילים',
+      placeholder: 'הקלד מילה, לחץ Enter…',
+      addBtn: 'הוסף +',
+      emptyTray: 'אין מילים עדיין — הוסף למעלה',
+      clearAll: 'נקה הכל',
       gridSettings: 'הגדרות לוח',
-      rowsLabel:    'שורות',
-      colsLabel:    'עמודות',
-      generateBtn:  'צור פאזל',
-      showSolution: 'הצג פתרון',
-      hideSolution: 'הסתר פתרון',
-      regenerate:   '↺ צור מחדש',
-      printBtn:     'הדפס / שמור PDF',
-      findWords:    'מצא מילים אלו',
-      footer:       'נוצר על ידי אור ונון באמצעות Claude Code, 2026',
-      errNoWords:   'הוסף לפחות מילה אחת תחילה.',
-      errTooLong:   w => `ארוך מדי ללוח: ${w}. הגדל שורות/עמודות.`,
-      warnFailed:   w => `לא ניתן למקם (נסה לוח גדול יותר): ${w}`,
-      wordCount:    n => n === 1 ? 'מילה אחת' : `${n} מילים`,
+      rowsLabel: 'שורות', colsLabel: 'עמודות',
+      generateBtn: 'צור פאזל',
+      showSolution: 'הצג פתרון', hideSolution: 'הסתר פתרון',
+      regenerate: '↺ צור מחדש',
+      printBtn: 'הדפס / שמור PDF',
+      findWords: 'מצא מילים אלו',
+      namePh: 'שם הפאזל…', saveBtn: 'שמור',
+      libTitle: 'פאזלים שמורים', libSub: 'מסונכרן בכל המכשירים שלך',
+      refresh: '↺ רענן',
+      libEmpty: 'אין פאזלים שמורים עדיין. צור אחד ולחץ שמור!',
+      libLoading: 'טוען את הספרייה…',
+      libError: 'לא ניתן לטעון את הספרייה. בדוק את החיבור ונסה שוב.',
+      playBtn: 'שחק', deleteBtn: 'מחק',
+      playEmpty: 'בחר פאזל מהספרייה כדי להתחיל לשחק.',
+      goLibrary: 'לספרייה',
+      backLib: '→ ספרייה',
+      resetBtn: 'אפס התקדמות',
+      winTitle: 'מצאת את כולן!', winMsg: 'עבודה מדהימה!',
+      playAgain: 'שחק שוב',
+      footer: 'נוצר על ידי אור ונון באמצעות Claude Code, 2026',
+      errNoWords: 'הוסף לפחות מילה אחת תחילה.',
+      errTooLong: w => `ארוך מדי ללוח: ${w}. הגדל שורות/עמודות.`,
+      warnFailed: w => `לא ניתן למקם (נסה לוח גדול יותר): ${w}`,
+      wordCount: n => n === 1 ? 'מילה אחת' : `${n} מילים`,
+      wordsN: n => n === 1 ? 'מילה אחת' : `${n} מילים`,
+      progress: (a, b) => `${a} / ${b} נמצאו`,
+      savedToast: 'נשמר בספרייה ✓',
+      deletedToast: 'הפאזל נמחק',
+      nameRequired: 'נא לתת שם לפאזל תחילה.',
+      saveError: 'השמירה נכשלה — בדוק את החיבור.',
+      deleteError: 'המחיקה נכשלה — נסה שוב.',
+      confirmDelete: name => `למחוק את "${name}"?`,
+      generateFirst: 'צור פאזל תחילה.',
     },
   };
 
@@ -601,6 +725,7 @@
     document.body.dir = lang === 'he' ? 'rtl' : 'ltr';
     document.getElementById('btn-en').classList.toggle('active', lang === 'en');
     document.getElementById('btn-he').classList.toggle('active', lang === 'he');
+
     document.querySelectorAll('[data-i18n]').forEach(el => {
       const v = t[el.dataset.i18n];
       if (typeof v === 'string') el.textContent = v;
@@ -609,24 +734,44 @@
       const v = t[el.dataset.i18nPh];
       if (typeof v === 'string') el.placeholder = v;
     });
+
     renderChips();
     const out = document.getElementById('puzzle-out');
     if (out.classList.contains('on')) {
-      document.getElementById('sol-btn').textContent =
-        solState.visible ? t.hideSolution : t.showSolution;
+      document.getElementById('sol-btn').textContent = solState.visible ? t.hideSolution : t.showSolution;
     }
+    if (document.getElementById('view-library').classList.contains('on')) renderLibrary();
+    if (play.puzzle) { renderFindList(); updateProgress(); }
   }
 
+  function toast(msg, kind) {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.className = 'toast on' + (kind ? ' ' + kind : '');
+    clearTimeout(toast._t);
+    toast._t = setTimeout(() => { el.className = 'toast'; }, 2600);
+  }
+
+  // ── View router ──────────────────────────────────────────────────
+  function switchView(name) {
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('on'));
+    document.getElementById('view-' + name).classList.add('on');
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.toggle('active', b.dataset.view === name));
+    if (name === 'library') loadLibrary();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+  document.querySelectorAll('.nav-btn').forEach(b => b.addEventListener('click', () => switchView(b.dataset.view)));
+
+  // ── Word manager ─────────────────────────────────────────────────
   const ENGLISH_ALPHA = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
   const HEBREW_ALPHA  = 'אבגדהוזחטיכלמנסעפצקרשת';
   const DIRS = [[0,1],[0,-1],[1,0],[-1,0],[1,1],[1,-1],[-1,1],[-1,-1]];
 
   let words = [];
   let solState = { visible: false, cells: new Set() };
+  let current = null; // last generated puzzle: {lang, rows, cols, grid, words:[{word,cells}]}
 
-  document.getElementById('word-input').addEventListener('keydown', e => {
-    if (e.key === 'Enter') addWord();
-  });
+  document.getElementById('word-input').addEventListener('keydown', e => { if (e.key === 'Enter') addWord(); });
 
   function addWord() {
     const inp = document.getElementById('word-input');
@@ -666,18 +811,17 @@
     });
   }
 
-  function escHtml(s) {
-    return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');
-  }
+  function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
 
   function renderChips() {
-    const tray  = document.getElementById('tray');
+    const tray = document.getElementById('tray');
     const count = document.getElementById('wcount');
-    const t     = UI[uiLang];
+    const t = UI[uiLang];
     tray.innerHTML = '';
     if (!words.length) {
       const empty = document.createElement('span');
       empty.className = 'tray-empty';
+      empty.dataset.i18n = 'emptyTray';
       empty.textContent = t.emptyTray;
       tray.appendChild(empty);
       count.textContent = t.wordCount(0);
@@ -688,14 +832,13 @@
       const chip = document.createElement('div');
       chip.className = 'chip';
       chip.dataset.i = i;
-      chip.innerHTML = `
-        <span class="chip-word" title="Click to edit" onclick="startEdit(${i})">${escHtml(word)}</span>
-        <button class="chip-del" onclick="removeWord(${i})" title="Remove word">✕</button>
-      `;
+      chip.innerHTML = `<span class="chip-word" title="Click to edit" onclick="startEdit(${i})">${escHtml(word)}</span>
+        <button class="chip-del" onclick="removeWord(${i})" title="Remove word">✕</button>`;
       tray.appendChild(chip);
     });
   }
 
+  // ── Puzzle generation ────────────────────────────────────────────
   function shuffle(arr) {
     const a = [...arr];
     for (let i = a.length - 1; i > 0; i--) {
@@ -704,13 +847,10 @@
     }
     return a;
   }
-
   function detectLang(list) { return list.some(w => /[א-ת]/.test(w)) ? 'he' : 'en'; }
-
   function cleanWord(word, lang) {
     return lang === 'he' ? word.replace(/[^א-ת]/g, '') : word.toUpperCase().replace(/[^A-Z]/g, '');
   }
-
   function canPlace(grid, word, r, c, dr, dc, rows, cols) {
     for (let i = 0; i < word.length; i++) {
       const nr = r + dr * i, nc = c + dc * i;
@@ -720,7 +860,6 @@
     }
     return true;
   }
-
   function doPlace(grid, word, r, c, dr, dc) {
     const cells = [];
     for (let i = 0; i < word.length; i++) {
@@ -729,14 +868,12 @@
     }
     return cells;
   }
-
   function placeWord(grid, word, rows, cols) {
     const opts = [];
     for (const [dr, dc] of DIRS)
       for (let r = 0; r < rows; r++)
         for (let c = 0; c < cols; c++)
-          if (canPlace(grid, word, r, c, dr, dc, rows, cols))
-            opts.push([r, c, dr, dc]);
+          if (canPlace(grid, word, r, c, dr, dc, rows, cols)) opts.push([r, c, dr, dc]);
     if (!opts.length) return null;
     const [r, c, dr, dc] = opts[Math.floor(Math.random() * opts.length)];
     return doPlace(grid, word, r, c, dr, dc);
@@ -756,22 +893,26 @@
     const rows = Math.max(5, Math.min(30, parseInt(document.getElementById('rows').value) || 12));
     const cols = Math.max(5, Math.min(30, parseInt(document.getElementById('cols').value) || 12));
     const puzzleLang = detectLang(words);
-    const cleaned = words.map(w => cleanWord(w, puzzleLang)).filter(w => w.length > 0);
+    // Map cleaned words back to their original label so we can show/save the original spelling.
+    const entries = words
+      .map(orig => ({ orig, clean: cleanWord(orig, puzzleLang) }))
+      .filter(e => e.clean.length > 0);
 
-    const tooLong = cleaned.filter(w => w.length > Math.max(rows, cols));
-    if (tooLong.length) { setError(t.errTooLong(tooLong.join(', '))); return; }
+    const tooLong = entries.filter(e => e.clean.length > Math.max(rows, cols));
+    if (tooLong.length) { setError(t.errTooLong(tooLong.map(e => e.orig).join(', '))); return; }
 
     const grid = Array.from({ length: rows }, () => Array(cols).fill(null));
-    const sorted = shuffle(cleaned).sort((a, b) => b.length - a.length);
+    const sorted = shuffle(entries).sort((a, b) => b.clean.length - a.clean.length);
     const solCells = new Set();
-    const placed = [], failed = [];
+    const placedWords = [], failed = [];
 
-    for (const word of sorted) {
-      const cells = placeWord(grid, word, rows, cols);
-      if (cells) { cells.forEach(k => solCells.add(k)); placed.push(word); }
-      else failed.push(word);
+    for (const e of sorted) {
+      const cells = placeWord(grid, e.clean, rows, cols);
+      if (cells) { cells.forEach(k => solCells.add(k)); placedWords.push({ word: e.orig, clean: e.clean, cells }); }
+      else failed.push(e.orig);
     }
 
+    // Fill empty cells, avoiding same letter as orthogonal neighbours
     const alpha = puzzleLang === 'he' ? HEBREW_ALPHA : ENGLISH_ALPHA;
     const alphaArr = [...alpha];
     for (let r = 0; r < rows; r++) {
@@ -788,17 +929,14 @@
       }
     }
 
+    current = { lang: puzzleLang, rows, cols, grid, words: placedWords };
     solState = { visible: false, cells: solCells };
     renderGrid(grid, rows, cols, puzzleLang);
-    renderFindChips(placed, puzzleLang);
+    renderFindChips(placedWords.map(p => p.word), puzzleLang);
 
     const warn = document.getElementById('warn-box');
-    if (failed.length) {
-      warn.textContent = t.warnFailed(failed.join(', '));
-      warn.classList.add('on');
-    } else {
-      warn.classList.remove('on');
-    }
+    if (failed.length) { warn.textContent = t.warnFailed(failed.join(', ')); warn.classList.add('on'); }
+    else warn.classList.remove('on');
 
     document.getElementById('sol-btn').textContent = t.showSolution;
     const out = document.getElementById('puzzle-out');
@@ -838,12 +976,317 @@
     const t = UI[uiLang];
     solState.visible = !solState.visible;
     document.querySelectorAll('#grid td').forEach(td => {
-      if (solState.cells.has(td.dataset.pos))
-        td.classList.toggle('solved', solState.visible);
+      if (solState.cells.has(td.dataset.pos)) td.classList.toggle('solved', solState.visible);
     });
-    document.getElementById('sol-btn').textContent =
-      solState.visible ? t.hideSolution : t.showSolution;
+    document.getElementById('sol-btn').textContent = solState.visible ? t.hideSolution : t.showSolution;
   }
+
+  // ── Library (cloud) ──────────────────────────────────────────────
+  const API = '/api/library';
+  let libraryCache = [];
+
+  async function loadLibrary() {
+    const t = UI[uiLang];
+    const body = document.getElementById('lib-body');
+    body.innerHTML = `<div class="lib-state"><div class="spinner"></div>${t.libLoading}</div>`;
+    try {
+      const res = await fetch(API, { headers: { 'Accept': 'application/json' } });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const data = await res.json();
+      libraryCache = Array.isArray(data.puzzles) ? data.puzzles : [];
+      renderLibrary();
+    } catch (err) {
+      body.innerHTML = `<div class="lib-state"><span class="big">⚠️</span>${t.libError}</div>`;
+    }
+  }
+
+  function renderLibrary() {
+    const t = UI[uiLang];
+    const body = document.getElementById('lib-body');
+    if (!libraryCache.length) {
+      body.innerHTML = `<div class="lib-state"><span class="big">📚</span>${t.libEmpty}</div>`;
+      return;
+    }
+    const grid = document.createElement('div');
+    grid.className = 'lib-grid';
+    libraryCache.forEach(p => {
+      const total = (p.words || []).length;
+      const done = playProgress(p.id).filter(w => (p.words || []).some(x => x.word === w)).length;
+      const complete = total > 0 && done >= total;
+      const langLabel = p.lang === 'he' ? 'עברית' : 'EN';
+      const card = document.createElement('div');
+      card.className = 'pz-card';
+      card.innerHTML = `
+        <div class="pz-top">
+          <div class="pz-name">${escHtml(p.name)}</div>
+          <div class="pz-badges">
+            <span class="badge lang">${langLabel}</span>
+            ${complete ? '<span class="badge done">✓</span>' : ''}
+          </div>
+        </div>
+        <div class="pz-meta">${p.rows}×${p.cols} · ${t.wordsN(total)}${total ? ` · ${done}/${total}` : ''}</div>
+        <div class="pz-actions">
+          <button class="btn btn-accent play-act">${t.playBtn}</button>
+          <button class="btn btn-outline del-act" style="flex:0 0 auto;color:var(--danger);border-color:#fecaca">${t.deleteBtn}</button>
+        </div>`;
+      card.querySelector('.play-act').addEventListener('click', () => openPlay(p));
+      card.querySelector('.del-act').addEventListener('click', () => deletePuzzle(p));
+      grid.appendChild(card);
+    });
+    body.innerHTML = '';
+    body.appendChild(grid);
+  }
+
+  async function saveCurrent() {
+    const t = UI[uiLang];
+    if (!current) { toast(t.generateFirst, 'err'); return; }
+    const nameEl = document.getElementById('save-name');
+    const name = nameEl.value.trim();
+    if (!name) { nameEl.focus(); toast(t.nameRequired, 'err'); return; }
+    const btn = document.getElementById('save-btn');
+    btn.disabled = true;
+    try {
+      const res = await fetch(API, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name, lang: current.lang, rows: current.rows, cols: current.cols,
+          grid: current.grid,
+          words: current.words.map(w => ({ word: w.word, cells: w.cells })),
+        }),
+      });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const saved = await res.json();
+      libraryCache = [saved, ...libraryCache.filter(x => x.id !== saved.id)];
+      nameEl.value = '';
+      toast(t.savedToast, 'ok');
+    } catch (err) {
+      toast(t.saveError, 'err');
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  async function deletePuzzle(p) {
+    const t = UI[uiLang];
+    if (!confirm(t.confirmDelete(p.name))) return;
+    try {
+      const res = await fetch(`${API}?id=${encodeURIComponent(p.id)}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      libraryCache = libraryCache.filter(x => x.id !== p.id);
+      localStorage.removeItem('jigsaw_play_' + p.id);
+      renderLibrary();
+      toast(t.deletedToast, 'ok');
+    } catch (err) {
+      toast(t.deleteError, 'err');
+    }
+  }
+
+  // ── Play (drag to find) ──────────────────────────────────────────
+  const FOUND_COLORS = ['#fde68a','#bbf7d0','#bfdbfe','#f5d0fe','#fed7aa','#a7f3d0','#ddd6fe','#fbcfe8','#fecdd3','#c7d2fe'];
+  const play = { puzzle: null, found: new Set(), selecting: false, anchor: null, path: [] };
+
+  function playProgress(id) {
+    try { return JSON.parse(localStorage.getItem('jigsaw_play_' + id) || '[]'); }
+    catch { return []; }
+  }
+  function savePlayProgress() {
+    if (!play.puzzle) return;
+    localStorage.setItem('jigsaw_play_' + play.puzzle.id, JSON.stringify([...play.found]));
+  }
+
+  function openPlay(p) {
+    play.puzzle = p;
+    play.found = new Set(playProgress(p.id).filter(w => (p.words || []).some(x => x.word === w)));
+    play.selecting = false; play.anchor = null; play.path = [];
+    document.getElementById('play-empty').style.display = 'none';
+    document.getElementById('play-main').style.display = 'block';
+    document.getElementById('play-title').textContent = p.name;
+    renderPlayGrid();
+    renderFindList();
+    updateProgress();
+    switchView('play');
+  }
+
+  function cellKey(r, c) { return `${r},${c}`; }
+
+  function renderPlayGrid() {
+    const p = play.puzzle;
+    const table = document.getElementById('pgrid');
+    table.innerHTML = '';
+    table.dir = p.lang === 'he' ? 'rtl' : 'ltr';
+    for (let r = 0; r < p.rows; r++) {
+      const tr = document.createElement('tr');
+      for (let c = 0; c < p.cols; c++) {
+        const td = document.createElement('td');
+        td.textContent = (p.grid[r] && p.grid[r][c]) || '';
+        td.dataset.r = r; td.dataset.c = c;
+        tr.appendChild(td);
+      }
+      table.appendChild(tr);
+    }
+    // Re-apply already-found words (resume)
+    play.found.forEach(w => {
+      const wd = (p.words || []).find(x => x.word === w);
+      if (wd) colorCells(wd.cells, colorFor(w));
+    });
+    attachPlayHandlers(table);
+  }
+
+  function colorFor(word) {
+    const idx = (play.puzzle.words || []).findIndex(x => x.word === word);
+    return FOUND_COLORS[((idx >= 0 ? idx : 0) % FOUND_COLORS.length)];
+  }
+
+  function tdAt(r, c) {
+    return document.querySelector(`#pgrid td[data-r="${r}"][data-c="${c}"]`);
+  }
+
+  function colorCells(cells, color) {
+    cells.forEach(k => {
+      const [r, c] = k.split(',').map(Number);
+      const td = tdAt(r, c);
+      if (td && !td.classList.contains('found')) {
+        td.classList.add('found');
+        td.style.background = color;
+      }
+    });
+  }
+
+  let handlersBound = false;
+  function attachPlayHandlers(table) {
+    if (handlersBound) return; // table is reused by id; bind once
+    handlersBound = true;
+    table.addEventListener('pointerdown', onPointerDown);
+    table.addEventListener('pointermove', onPointerMove);
+    table.addEventListener('pointerup', onPointerUp);
+    table.addEventListener('pointercancel', onPointerUp);
+  }
+
+  function cellFromEvent(e) {
+    const el = document.elementFromPoint(e.clientX, e.clientY);
+    const td = el && el.closest && el.closest('#pgrid td[data-r]');
+    if (!td) return null;
+    return { r: +td.dataset.r, c: +td.dataset.c };
+  }
+
+  function buildLine(a, b) {
+    const dr = b.r - a.r, dc = b.c - a.c;
+    if (!(dr === 0 || dc === 0 || Math.abs(dr) === Math.abs(dc))) return null;
+    const len = Math.max(Math.abs(dr), Math.abs(dc));
+    const sr = Math.sign(dr), sc = Math.sign(dc);
+    const cells = [];
+    for (let i = 0; i <= len; i++) cells.push(cellKey(a.r + sr * i, a.c + sc * i));
+    return cells;
+  }
+
+  function clearSel() {
+    document.querySelectorAll('#pgrid td.sel').forEach(td => td.classList.remove('sel'));
+  }
+  function paintSel(path) {
+    clearSel();
+    path.forEach(k => {
+      const [r, c] = k.split(',').map(Number);
+      const td = tdAt(r, c);
+      if (td && !td.classList.contains('found')) td.classList.add('sel');
+    });
+  }
+
+  function onPointerDown(e) {
+    const cell = cellFromEvent(e);
+    if (!cell) return;
+    e.preventDefault();
+    play.selecting = true;
+    play.anchor = cell;
+    play.path = [cellKey(cell.r, cell.c)];
+    try { e.currentTarget.setPointerCapture(e.pointerId); } catch {}
+    paintSel(play.path);
+  }
+  function onPointerMove(e) {
+    if (!play.selecting) return;
+    e.preventDefault();
+    const cell = cellFromEvent(e);
+    if (!cell) return;
+    const line = buildLine(play.anchor, cell);
+    if (line) { play.path = line; paintSel(line); }
+  }
+  function onPointerUp(e) {
+    if (!play.selecting) return;
+    play.selecting = false;
+    evaluateSelection();
+    clearSel();
+    play.path = [];
+    play.anchor = null;
+  }
+
+  function arraysEqual(a, b) {
+    if (a.length !== b.length) return false;
+    for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) return false;
+    return true;
+  }
+
+  function evaluateSelection() {
+    const path = play.path;
+    if (path.length < 1) return; // length 1 = a single tap, which matches a 1-letter word
+    const rev = [...path].reverse();
+    for (const wd of (play.puzzle.words || [])) {
+      if (play.found.has(wd.word)) continue;
+      if (arraysEqual(path, wd.cells) || arraysEqual(rev, wd.cells)) {
+        markFound(wd);
+        return;
+      }
+    }
+  }
+
+  function markFound(wd) {
+    play.found.add(wd.word);
+    colorCells(wd.cells, colorFor(wd.word));
+    renderFindList();
+    updateProgress();
+    savePlayProgress();
+    if (play.found.size >= (play.puzzle.words || []).length) setTimeout(showWin, 350);
+  }
+
+  function renderFindList() {
+    if (!play.puzzle) return;
+    const list = document.getElementById('find-list');
+    list.dir = play.puzzle.lang === 'he' ? 'rtl' : 'ltr';
+    list.innerHTML = '';
+    (play.puzzle.words || []).forEach(wd => {
+      const el = document.createElement('div');
+      el.className = 'find-word' + (play.found.has(wd.word) ? ' done' : '');
+      el.textContent = wd.word;
+      list.appendChild(el);
+    });
+  }
+
+  function updateProgress() {
+    const t = UI[uiLang];
+    const total = (play.puzzle.words || []).length;
+    document.getElementById('play-progress').textContent = t.progress(play.found.size, total);
+  }
+
+  function resetPlay() {
+    if (!play.puzzle) return;
+    play.found = new Set();
+    savePlayProgress();
+    closeWin();
+    renderPlayGrid();
+    renderFindList();
+    updateProgress();
+  }
+
+  function showWin() {
+    document.getElementById('win-msg').textContent = UI[uiLang].winMsg;
+    document.getElementById('win-overlay').classList.add('on');
+  }
+  function closeWin() { document.getElementById('win-overlay').classList.remove('on'); }
+  document.getElementById('win-overlay').addEventListener('click', e => {
+    if (e.target.id === 'win-overlay') closeWin();
+  });
+
+  // ── Init ─────────────────────────────────────────────────────────
+  setLang('en');
 </script>
 </body>
 </html>
