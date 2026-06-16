@@ -70,7 +70,9 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 
 > **Before making any changes, read and update `project-card.md` first.**
 
-- This is a single-file vanilla JS/HTML app — no build step, no framework.
-- Language detection (Hebrew vs English) is automatic based on input characters.
+- Vanilla JS/HTML frontend (`index.html`, no framework, no build step) + Vercel serverless API (`api/library.js`) backed by a private Vercel Blob store. Deploys from the GitHub branch; `vercel dev` runs it locally.
+- Three views in `index.html`: Create (generate + save), Library (cloud, synced), Play (iPad drag-to-find).
+- Language detection (Hebrew vs English) is automatic based on input characters; the whole UI is RTL-aware.
 - Word placement must only allow cell sharing when letters match (no silent overwrites).
-- Keep the algorithm in one `<script>` block inside `index.html`.
+- Keep the puzzle/generation/play algorithm in one `<script>` block inside `index.html`. Only persistence/sync lives in `api/`.
+- Cloud library: ONE private Blob per puzzle at `puzzles/<id>.json` — never a single shared file (read-modify-write of a shared blob loses data under blob caching). Play progress is per-device in `localStorage` (`jigsaw_play_<id>`), not synced.
