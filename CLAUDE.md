@@ -1,74 +1,44 @@
-# CLAUDE.md
+# Word Search Studio (Jigsaw-generator)
 
-Behavioral guidelines to reduce common LLM coding mistakes. Merge with project-specific instructions as needed.
+General workflow (sizing, approvals, TDD, quality gates, verification, UI design rules, git, model choice) lives in `~/.claude/CLAUDE.md`. Follow it. This file holds only what is specific to this project. A rule here that differs from the global one is marked **Overrides global** and wins for this project.
 
-**Tradeoff:** These guidelines bias toward caution over speed. For trivial tasks, use judgment.
+## What it is
 
-## 1. Think Before Coding
+A word-search studio: create English/Hebrew puzzles, save them to a cloud library synced across devices, and play them on an iPad by dragging a finger across the letters. A family tool. Status: paused since 2026-06 (last commit 2026-06-16, v2 2.0.0).
 
-**Don't assume. Don't hide confusion. Surface tradeoffs.**
+## Stack
 
-Before implementing:
-- State your assumptions explicitly. If uncertain, ask.
-- If multiple interpretations exist, present them - don't pick silently.
-- If a simpler approach exists, say so. Push back when warranted.
-- If something is unclear, stop. Name what's confusing. Ask.
+Vanilla HTML/CSS/JS (no framework, no build step), Vercel serverless function (Node, ESM), `@vercel/blob` (private store `jigsaw-library`), hosted on Vercel (`project-card.md`: auto-deploys from branch `claude/jigsaw-puzzle-generator-6fX63`). Repo: `github.com/orvanon/Jigsaw-generator` (`package.json`).
 
-## 2. Simplicity First
+## Layout
 
-**Minimum code that solves the problem. Nothing speculative.**
+| Path | What's there |
+| --- | --- |
+| `index.html` | Whole frontend: Create / Library / Play views and all puzzle logic |
+| `api/library.js` | Serverless CRUD at `/api/library` (GET list, POST create/update, DELETE `?id=`) |
+| `project-card.md` | Stack, data model, play interaction, known issues, changelog |
 
-- No features beyond what was asked.
-- No abstractions for single-use code.
-- No "flexibility" or "configurability" that wasn't requested.
-- No error handling for impossible scenarios.
-- If you write 200 lines and it could be 50, rewrite it.
+## Commands
 
-Ask yourself: "Would a senior engineer say this is overcomplicated?" If yes, simplify.
-
-## 3. Surgical Changes
-
-**Touch only what you must. Clean up only your own mess.**
-
-When editing existing code:
-- Don't "improve" adjacent code, comments, or formatting.
-- Don't refactor things that aren't broken.
-- Match existing style, even if you'd do it differently.
-- If you notice unrelated dead code, mention it - don't delete it.
-
-When your changes create orphans:
-- Remove imports/variables/functions that YOUR changes made unused.
-- Don't remove pre-existing dead code unless asked.
-
-The test: Every changed line should trace directly to the user's request.
-
-## 4. Goal-Driven Execution
-
-**Define success criteria. Loop until verified.**
-
-Transform tasks into verifiable goals:
-- "Add validation" → "Write tests for invalid inputs, then make them pass"
-- "Fix the bug" → "Write a test that reproduces it, then make it pass"
-- "Refactor X" → "Ensure tests pass before and after"
-
-For multi-step tasks, state a brief plan:
-```
-1. [Step] → verify: [check]
-2. [Step] → verify: [check]
-3. [Step] → verify: [check]
+```bash
+npm install
+vercel dev     # serves the frontend and the API locally
 ```
 
-Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.
+No test, build or lint scripts. Opening `index.html` directly works for Create only; Library and Play need the API (`project-card.md`).
 
----
+## Verify
 
-**These guidelines are working if:** fewer unnecessary changes in diffs, fewer rewrites due to overcomplication, and clarifying questions come before implementation rather than after mistakes.
+No automated checks. Run `vercel dev`, then in the browser: create a puzzle from a word list (English and Hebrew), save it, find it in Library on reload, play it by dragging across a word. Saving needs `BLOB_READ_WRITE_TOKEN` (see `.env*.local`, never commit it).
 
----
+## Docs
+
+`project-card.md`.
 
 ## Project-Specific Notes
 
 > **Before making any changes, read and update `project-card.md` first.**
+
 
 - Vanilla JS/HTML frontend (`index.html`, no framework, no build step) + Vercel serverless API (`api/library.js`) backed by a private Vercel Blob store. Deploys from the GitHub branch; `vercel dev` runs it locally.
 - Three views in `index.html`: Create (generate + save), Library (cloud, synced), Play (iPad drag-to-find).
